@@ -29,12 +29,14 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 
 /**
@@ -50,15 +52,18 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Basic: Linear ", group="Linear Opmode")
-//@Disabled hello testing
-public class BasicOpMode_Linear extends LinearOpMode {
+@TeleOp(name="PushBot: TeleOp", group="Linear Opmode")
+//@Disabled
+public class PushBotRemoteControl extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
-
+    private Servo servoTest = null;
+    private Servo servoRight = null;
+    private DcMotor centerArm = null;
+    private ColorSensor colorSensor = null;
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -69,12 +74,20 @@ public class BasicOpMode_Linear extends LinearOpMode {
         // step (using the FTC Robot Controller app on the phone).
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
-
+        servoTest = hardwareMap.get(Servo.class, "servo_test");
+        servoRight = hardwareMap.get(Servo.class, "servo_right");
+        centerArm = hardwareMap.get(DcMotor.class, "center_arm");
+        colorSensor = hardwareMap.get(ColorSensor.class, "color_sensor");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        leftDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);
-
+        leftDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightDrive.setDirection(DcMotor.Direction.FORWARD);
+        centerArm.setDirection(DcMotor.Direction.REVERSE);
+        colorSensor.enableLed(false);
+        //for use later
+        //servoTest.setPosition(0);
+        //servoTest.setPosition(0.5);
+        //servoTest.setPosition(1);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -85,18 +98,20 @@ public class BasicOpMode_Linear extends LinearOpMode {
             // Setup a variable for each drive wheel to save power level for telemetry
             double leftPower;
             double rightPower;
-
+            double centerPower;
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
 
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
-            double drive = -gamepad1.left_stick_y;
-            double turn  =  gamepad1.right_stick_x;
-            leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
-            rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
+            double drive = gamepad1.left_stick_y;
+            double turn  = -gamepad1.right_stick_x;
+            //gamepad1.
+            leftPower    = Range.clip(drive + turn, -1.0, 10.0) ;
+            rightPower   = Range.clip(drive - turn, -1.0, 10.0) ;
 
-            // Tank Mode uses one stick to control each wheel.
+            double raiseArm = gamepad2.left_stick_y;
+            centerPower  = Range.clip(raiseArm, -1.0, 10.0);
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
             // leftPower  = -gamepad1.left_stick_y ;
             // rightPower = -gamepad1.right_stick_y ;
@@ -104,11 +119,40 @@ public class BasicOpMode_Linear extends LinearOpMode {
             // Send calculated power to wheels
             leftDrive.setPower(leftPower);
             rightDrive.setPower(rightPower);
+            centerArm.setPower(centerPower);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+            telemetry.addData("Servos", "left (%.2f)");
             telemetry.update();
+            // run until the end of the match (driver presses STOP)
+            // check to see if we need to move the servo.
+            if(gamepad2.y) {
+                // move to 0 degrees.
+                servoTest.setPosition(0);
+                servoRight.setPosition(0);
+            } else if (gamepad2.x || gamepad2.b) {
+                // move to 90 degrees.
+                servoTest.setPosition(0.9);
+                servoRight.setPosition(0.55);
+            } else if (gamepad2.a) {
+                // move to 180 degrees.
+                servoTest.setPosition(0.5);
+                servoRight.setPosition(1);
+            }
+
+            telemetry.addData("Color value", colorSensor.alpha());
+            if (colorSensor.blue() > 70)
+                break;
+
+            telemetry.addData("Servo Position", servoTest.getPosition());
+            //telemetry.addData("Target Power", tgtPower);
+            //telemetry.addData("Motor Power", motorTest.getPower());
+            telemetry.addData("Status", "Running");
+            telemetry.update();
+
+
         }
     }
 }
