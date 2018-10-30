@@ -12,6 +12,9 @@ public class JTHRobot {
     private ElapsedTime runtime = new ElapsedTime();
     private JTHHookArm hookArm;
     private JTHArm arm;
+    public DcMotor leftDrive;
+    public DcMotor rightDrive;
+
 
     public DcMotor getLeftDrive() {
         return leftDrive;
@@ -21,8 +24,6 @@ public class JTHRobot {
         this.leftDrive = leftDrive;
     }
 
-    private DcMotor leftDrive;
-
     public DcMotor getRightDrive() {
         return rightDrive;
     }
@@ -31,20 +32,32 @@ public class JTHRobot {
         this.rightDrive = rightDrive;
     }
 
-    private DcMotor rightDrive;
+
+
 
     public JTHRobot(HardwareMap hardwareMap, Telemetry t) {
         //hookArm = new JTHHookArm(hardwareMap);
         telemetry = t;
         leftDrive = hardwareMap.get(DcMotor.class, JTHConstants.leftDrive);
         rightDrive = hardwareMap.get(DcMotor.class, JTHConstants.rightDrive);
-        leftDrive.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+//        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+        //leftArm.setPower(0);
+
+        // Set all motors to run without encoders.
+        // May want to use RUN_USING_ENCODERS if encoders are installed.
+        leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //leftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
     }
 
