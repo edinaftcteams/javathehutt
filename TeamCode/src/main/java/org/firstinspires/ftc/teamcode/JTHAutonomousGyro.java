@@ -165,7 +165,7 @@ public class JTHAutonomousGyro extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
         gyroDrive(DRIVE_SPEED, 48.0, 0.0);    // Drive FWD 48 inches
-        gyroTurn( TURN_SPEED, 45.0);         // Turn  CCW to -45 Degrees
+        gyroTurn( TURN_SPEED, -45.0);         // Turn  CCW to -45 Degrees
 //        gyroHold( TURN_SPEED, -45.0, 0.5);    // Hold -45 Deg heading for a 1/2 second
 //        gyroDrive(DRIVE_SPEED, 12.0, -45.0);  // Drive FWD 12 inches at 45 degrees
 //        gyroTurn( TURN_SPEED,  45.0);         // Turn  CW  to  45 Degrees
@@ -225,9 +225,8 @@ public class JTHAutonomousGyro extends LinearOpMode {
             robot.rightDrive.setPower(speed);
 
             // keep looping while we are still active, and BOTH motors are running.
-            while (opModeIsActive()) {
-                //&&
-//                    (robot.leftDrive.isBusy() && robot.rightDrive.isBusy())) {
+            while (opModeIsActive() &&
+                    (robot.leftDrive.isBusy() && robot.rightDrive.isBusy())) {
 
                 // adjust relative speed based on heading error.
 //                error = getError(angle);
@@ -276,8 +275,8 @@ public class JTHAutonomousGyro extends LinearOpMode {
             robot.rightDrive.setPower(0);
 
             // Turn off RUN_TO_POSITION
-            robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
     }
 
@@ -299,7 +298,8 @@ public class JTHAutonomousGyro extends LinearOpMode {
 //            // Update telemetry & Allow time for other processes to run.
 //            telemetry.update();
 //        }
-
+        telemetry.addData("In Gyro Turn", 10);
+        telemetry.update();
         double  leftPower, rightPower;
 
         // restart imu movement tracking.
@@ -320,21 +320,34 @@ public class JTHAutonomousGyro extends LinearOpMode {
         }
         else return;
 
-        // set power to rotate.
-        robot.getLeftDrive().setPower(leftPower);
-        robot.getRightDrive().setPower(rightPower);
+        while(opModeIsActive()) {
+            // set power to rotate.
+            robot.getLeftDrive().setPower(leftPower);
+            robot.getRightDrive().setPower(rightPower);
 
-        // rotate until turn is completed.
-        if (angle < 0)
-        {
-            // On right turn we have to get off zero first.
-            while (opModeIsActive() && getAngle() == 0) {}
+            // rotate until turn is completed.
+            if (angle < 0) {
+                telemetry.addLine("In Gyro less than 0");
+                // On right turn we have to get off zero first.
+                while (opModeIsActive() && getAngle() == 0) {
+                    telemetry.addData("In Gyro Turn A", getAngle());
+                    telemetry.update();
+                }
 
-            while (opModeIsActive() && getAngle() > angle) {}
+                while (opModeIsActive() && getAngle() > angle) {
+                    telemetry.addData("In Gyro Turn B", getAngle());
+                    telemetry.update();
+                }
+            } else// left turn.
+            {
+                telemetry.addLine("In Gyro Turn");
+                while (opModeIsActive() && getAngle() < angle) {
+                    telemetry.addData("In Gyro Turn C", getAngle());
+                    telemetry.update();
+                }
+            }
+
         }
-        else    // left turn.
-            while (opModeIsActive() && getAngle() < angle) {}
-
         // turn the motors off.
         robot.getRightDrive().setPower(0);
         robot.getLeftDrive().setPower(0);
@@ -466,7 +479,7 @@ public class JTHAutonomousGyro extends LinearOpMode {
         // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
         // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
 
-        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
         double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
 
