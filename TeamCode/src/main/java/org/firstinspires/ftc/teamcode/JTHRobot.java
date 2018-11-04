@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -10,8 +11,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class JTHRobot {
     private Telemetry telemetry;
     private ElapsedTime runtime = new ElapsedTime();
-    private JTHHookArm hookArm;
-    private JTHArm arm;
+    private Servo slideArmHook;
+    private DcMotor slideArmDrive;
     public DcMotor leftDrive;
     public DcMotor rightDrive;
 
@@ -40,17 +41,15 @@ public class JTHRobot {
         telemetry = t;
         leftDrive = hardwareMap.get(DcMotor.class, JTHConstants.leftDrive);
         rightDrive = hardwareMap.get(DcMotor.class, JTHConstants.rightDrive);
+        slideArmDrive = hardwareMap.get(DcMotor.class, JTHConstants.slideArmDrive);
+        slideArmHook = hardwareMap.get(Servo.class, JTHConstants.slideArmHook);
+        slideArmDrive.setDirection(DcMotorSimple.Direction.FORWARD);
         leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         rightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
-//        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//
-//        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         leftDrive.setPower(0);
         rightDrive.setPower(0);
-        //leftArm.setPower(0);
+        slideArmDrive.setPower(1);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.

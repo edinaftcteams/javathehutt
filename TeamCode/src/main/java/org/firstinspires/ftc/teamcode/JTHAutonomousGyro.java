@@ -228,28 +228,6 @@ public class JTHAutonomousGyro extends LinearOpMode {
             while (opModeIsActive() &&
                     (robot.leftDrive.isBusy() && robot.rightDrive.isBusy())) {
 
-                // adjust relative speed based on heading error.
-//                error = getError(angle);
-//                steer = getSteer(error, P_DRIVE_COEFF);
-//
-//                // if driving in reverse, the motor correction also needs to be reversed
-//                if (distance < 0)
-//                    steer *= -1.0;
-//
-//                leftSpeed = speed - steer;
-//                rightSpeed = speed + steer;
-//
-//                // Normalize speeds if either one exceeds +/- 1.0;
-//                max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
-//                if (max > 1.0)
-//                {
-//                    leftSpeed /= max;
-//                    rightSpeed /= max;
-//                }
-//
-//                robot.leftDrive.setPower(leftSpeed);
-//                robot.rightDrive.setPower(rightSpeed);
-
                 correction = checkDirection();
 
                 telemetry.addData("1 imu heading", lastAngles.firstAngle);
@@ -260,14 +238,6 @@ public class JTHAutonomousGyro extends LinearOpMode {
                 robot.leftDrive.setPower(-speed + correction);
                 robot.rightDrive.setPower(-speed);
 
-
-                // Display drive status for the driver.
-//                telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, steer);
-//                telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
-//                telemetry.addData("Actual",  "%7d:%7d",      robot.leftDrive.getCurrentPosition(),
-//                        robot.rightDrive.getCurrentPosition());
-//                telemetry.addData("Speed",   "%5.2f:%5.2f",  leftSpeed, rightSpeed);
-//                telemetry.update();
             }
 
             // Stop all motion;
@@ -338,6 +308,8 @@ public class JTHAutonomousGyro extends LinearOpMode {
                     telemetry.addData("In Gyro Turn B", getAngle());
                     telemetry.update();
                 }
+                robot.getRightDrive().setPower(0);
+                robot.getLeftDrive().setPower(0);
             } else// left turn.
             {
                 telemetry.addLine("In Gyro Turn");
@@ -345,6 +317,8 @@ public class JTHAutonomousGyro extends LinearOpMode {
                     telemetry.addData("In Gyro Turn C", getAngle());
                     telemetry.update();
                 }
+                robot.getRightDrive().setPower(0);
+                robot.getLeftDrive().setPower(0);
             }
 
         }

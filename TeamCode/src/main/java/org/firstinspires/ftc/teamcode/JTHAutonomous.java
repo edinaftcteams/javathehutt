@@ -10,6 +10,6 @@ public class JTHAutonomous extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         robot = new JTHRobot(hardwareMap, telemetry);
-            robot.runAutonomous();
+        robot.runAutonomous();
     }
 }

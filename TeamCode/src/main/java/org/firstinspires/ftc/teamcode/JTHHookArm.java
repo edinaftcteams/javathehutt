@@ -10,8 +10,8 @@ public class JTHHookArm {
     private DcMotor armSlide = null;
     private Servo hookServo = null;
     public JTHHookArm(HardwareMap hardwareMap){
-        armSlide = hardwareMap.get(DcMotor.class, JTHConstants.slideMotor);
-        hookServo = hardwareMap.get(Servo.class, JTHConstants.hookServo);
+        armSlide = hardwareMap.get(DcMotor.class, JTHConstants.slideArmDrive);
+        hookServo = hardwareMap.get(Servo.class, JTHConstants.slideArmHook);
     }
 
     public void armSlideUp() {

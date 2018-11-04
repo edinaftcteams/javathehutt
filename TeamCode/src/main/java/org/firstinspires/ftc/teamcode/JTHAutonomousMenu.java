@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous(name="Encoder Long", group="JTH")
-public class JTHAutonomousLong extends LinearOpMode {
+public class JTHAutonomousMenu extends LinearOpMode {
     private JTHRobot robot = null;
 
     private AutonomousConfiguration autoConfig;
@@ -21,6 +21,7 @@ public class JTHAutonomousLong extends LinearOpMode {
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        robot = new JTHRobot(hardwareMap, telemetry);
 
         // Get configuration selections from the driver.
         autoConfig = new AutonomousConfiguration(gamepad1, telemetry);
@@ -48,7 +49,7 @@ public class JTHAutonomousLong extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        robot = new JTHRobot(hardwareMap, telemetry);
+
         if( startPosition.equals(AutonomousConfiguration.StartPosition.Left))
             robot.runAutoTwo();
         else
