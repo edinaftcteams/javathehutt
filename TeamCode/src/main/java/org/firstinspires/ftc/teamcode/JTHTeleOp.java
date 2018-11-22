@@ -64,12 +64,16 @@ public class JTHTeleOp extends LinearOpMode {
     DcMotor liftMotor;
     DcMotor leftMotor;
     DcMotor rightMotor;
+    DcMotor armMotor;
 
     Servo hookServo;
+    Servo markerServo;
 
     double liftPower = .8;
 
     int step = 0;
+    int driveStarted = 0;
+    float lastSpeed = 0;
     boolean isDocked = true;
     boolean undocking = false;
     boolean docking = false;
@@ -107,10 +111,12 @@ public class JTHTeleOp extends LinearOpMode {
         liftMotor = hardwareMap.get(DcMotor.class, "lift_drive");
         leftMotor = hardwareMap.get(DcMotor.class, "left_drive");
         rightMotor = hardwareMap.get(DcMotor.class, "right_drive");
+        armMotor = hardwareMap.get(DcMotor.class, "arm_drive");
 
         rightMotor.setDirection(DcMotor.Direction.REVERSE);
 
         hookServo = hardwareMap.get(Servo.class, "hook_servo");
+        markerServo = hardwareMap.get(Servo.class, "marker_servo");
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to run Motors.");
@@ -131,26 +137,40 @@ public class JTHTeleOp extends LinearOpMode {
             telemetry.addData("isHooked", isHooked);
             telemetry.addData("Step", step);
             telemetry.update();
-            driveUsingTankMode();
+
+            driveUsingPOVMode();
+
+            if (gamepad1.left_trigger >0) {
+                markerServo.setPosition(0);
+            } else if (gamepad1.right_trigger >0) {
+                markerServo.setPosition(1);
+            } else if ((docking == false) && (undocking == false)) {
+                armMotor.setPower(-gamepad2.left_stick_y * DRIVE_SPEED);
+            }
+
             if (gamepad1.a == true) {
                 dock();
 //            } else if (gamepad1.b == true) {
 //                unDock();
             } else if (gamepad1.x == true) {
+                encoderDrive(DRIVE_SPEED, 4, 4, 2.0);  // Backward
+            }
+            else if (gamepad1.y == true) {
                 encoderDrive(DRIVE_SPEED, -4, -4, 2.0);  // Forward 4 Inches with 2 Sec timeout
-            } else if (gamepad1.y == true) {
-                encoderDrive(DRIVE_SPEED, 4, 4, 2.0);  // Backward 4 Inches with 2 Sec timeout
             } else if (gamepad1.left_bumper == true) {
-                encoderDrive(TURN_SPEED, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
+                encoderDrive(TURN_SPEED, 6, -6, 1.0);  // left turn 2 Inches with 1 Sec timeout
             } else if (gamepad1.right_bumper == true) {
-                encoderDrive(TURN_SPEED, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
-            } else if (gamepad2.dpad_down == true) {
+                encoderDrive(TURN_SPEED, 12, -12, 1.0);  // right turn 2 Inches with 1 Sec timeout
+            } else if (gamepad1.dpad_down == true) {
                 lowerTheHook();
-            } else if (gamepad2.dpad_up == true) {
+            } else if (gamepad1.dpad_up == true) {
                 liftTheHook();
-            } else if (gamepad2.dpad_right == true) {
+            } else if (gamepad1.dpad_right == true) {
                 unHook();
-            } else if (gamepad2.dpad_left == true) {
+            }
+              else if (gamepad1.left_bumper){
+                //drop marker
+            } else if (gamepad1.dpad_left == true) {
                 hook();
             } else if (gamepad1.start == true) {
                 tankMode = !tankMode;
@@ -240,10 +260,36 @@ public class JTHTeleOp extends LinearOpMode {
     }
 
     public void driveUsingPOVMode() {
+
+
+        if (gamepad1.left_stick_y == 0) {
+            if (lastSpeed != 0) {
+                leftMotor.setPower(0);
+                rightMotor.setPower(0);
+                sleep(300);
+            }
+            driveStarted = 0;
+        } else if (((lastSpeed > 0) && (gamepad1.left_stick_y < 0)) || ((lastSpeed < 0) && (gamepad1.left_stick_y > 0))) {
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+            sleep(300);
+            driveStarted = 0;
+        } else {
+            driveStarted++;
+        }
+
+        lastSpeed = gamepad1.left_stick_y;
+
+
         // Run wheels in POV mode (note: The joystick goes negative when pushed forwards, so negate it)
         // In this mode the Left stick moves the robot fwd and back, the Right stick turns left and right.
         // This way it's also easy to just drive straight, or just turn.
-        drivePOV = -gamepad1.left_stick_y;
+
+        if (driveStarted < 100) {
+            drivePOV = -gamepad1.left_stick_y * 0.01 * driveStarted;
+        } else {
+            drivePOV = -gamepad1.left_stick_y;
+        }
         turnPOV = -gamepad1.right_stick_x;
 
         // Combine drive and turn for blended motion.

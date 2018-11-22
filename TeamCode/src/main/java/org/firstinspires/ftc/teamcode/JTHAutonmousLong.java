@@ -29,6 +29,8 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.sql.Driver;
+
 /*
  * Sample code for JavaTheHUTT - Raj Kammela 11/11/2018
  * 1. Two drive modes. Start button toggles between the modes. Default is Tank mode. You can see if robot is in Tank mode or not in driver station telemetry log
@@ -42,8 +44,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * 6. Left Bumper: Turn left 2 inches
  * 7. Right Bumper: Turn right 2 inches
  */
-@Autonomous(name = "JTH Autonomous Short", group = "JTH")
-public class JTHAutonomous extends LinearOpMode {
+@Autonomous(name = "JTH Autonomous Long", group = "JTH")
+public class JTHAutonmousLong extends LinearOpMode {
 
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -135,16 +137,23 @@ public class JTHAutonomous extends LinearOpMode {
 
             unDock();
 
-            encoderDrive(DRIVE_SPEED, 75, 75, 2.0);  // Forward 4 Inches with 2 Sec timeout
+            encoderDrive(DRIVE_SPEED, 40, 40, 2.0);  // Forward 4 Inches with 2 Sec timeout
 
             markerServo.setPosition(0);
 
-            encoderDrive(TURN_SPEED, 10, -10, 2.0);  // Backward 4 Inches with 2 Sec timeout
+            encoderDrive(TURN_SPEED, -7, 7, 2.0);  // Backward 4 Inches with 2 Sec timeout
 
-            encoderDrive(DRIVE_SPEED, -120, -120, 6.0);  // left turn 2 Inches with 1 Sec timeout
-            break;
-            }
+            encoderDrive(DRIVE_SPEED, 30, -30, 6.0);  // left turn 2 Inches with 1 Sec timeout
+
+            encoderDrive(TURN_SPEED, -2, 2, 2.0);
+
+            encoderDrive(DRIVE_SPEED, 80, 80, 5.0);
+
+            encoderDrive(TURN_SPEED, -1, 1, 2.0);
+
+            encoderDrive(DRIVE_SPEED, -100, -100, 6.0);
         }
+    }
 
 
 
