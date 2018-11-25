@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-@Autonomous(name="Encoder Long", group="JTH")
-public class JTHAutonomousMenu extends LinearOpMode {
-    private JTHRobot robot = null;
-
+@Autonomous(name="Menu Test", group="JTH")
+public class JTHAutonomousMenu extends JTHOpMode {
     private AutonomousConfiguration autoConfig;
     // The properties are available after the
     // call to the ShowMenu method of the AutonomousConfiguration class.
@@ -21,7 +19,8 @@ public class JTHAutonomousMenu extends LinearOpMode {
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        robot = new JTHRobot(hardwareMap, telemetry);
+        initRobot();
+
 
         // Get configuration selections from the driver.
         autoConfig = new AutonomousConfiguration(gamepad1, telemetry);
@@ -51,8 +50,60 @@ public class JTHAutonomousMenu extends LinearOpMode {
 
 
         if( startPosition.equals(AutonomousConfiguration.StartPosition.Left))
-            robot.runAutoTwo();
+        {
+            while (opModeIsActive())
+            {
+
+                telemetry.addLine();
+                telemetry.addData("Button", gamepad1.toString());
+                telemetry.addData("Tank Mode", tankMode);
+                telemetry.addData("isDocked", isDocked);
+                telemetry.addData("isHooked", isHooked);
+                telemetry.addData("Step", step);
+                telemetry.update();
+
+                unDock();
+
+                encoderDrive(DRIVE_SPEED, 40, 40, 2.0);  // Forward 4 Inches with 2 Sec timeout
+
+                markerServo.setPosition(0);
+
+                encoderDrive(TURN_SPEED, -7, 7, 2.0);  // Backward 4 Inches with 2 Sec timeout
+
+                encoderDrive(DRIVE_SPEED, 30, -30, 6.0);  // left turn 2 Inches with 1 Sec timeout
+
+                encoderDrive(TURN_SPEED, -2, 2, 2.0);
+
+                encoderDrive(DRIVE_SPEED, 80, 80, 5.0);
+
+                encoderDrive(TURN_SPEED, -1, 1, 2.0);
+
+                encoderDrive(DRIVE_SPEED, -100, -100, 6.0);
+            }
+        }
         else
-            robot.runAutonomous();
+        {
+            while (opModeIsActive()) {
+
+                telemetry.addLine();
+                telemetry.addData("Button", gamepad1.toString());
+                telemetry.addData("Tank Mode", tankMode);
+                telemetry.addData("isDocked", isDocked);
+                telemetry.addData("isHooked", isHooked);
+                telemetry.addData("Step", step);
+                telemetry.update();
+
+                unDock();
+
+                encoderDrive(DRIVE_SPEED, 75, 75, 2.0);  // Forward 4 Inches with 2 Sec timeout
+
+                markerServo.setPosition(0);
+
+                encoderDrive(TURN_SPEED, 10, -10, 2.0);  // Backward 4 Inches with 2 Sec timeout
+
+                encoderDrive(DRIVE_SPEED, -120, -120, 6.0);  // left turn 2 Inches with 1 Sec timeout
+                break;
+            }
+        }
     }
 }

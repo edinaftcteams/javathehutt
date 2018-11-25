@@ -41,51 +41,49 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class JTHOpMode extends LinearOpMode {
 
 
-    private ElapsedTime runtime = new ElapsedTime();
+    protected ElapsedTime runtime = new ElapsedTime();
 
-    static final double COUNTS_PER_MOTOR_REV = 56;
-    static final double DRIVE_GEAR_REDUCTION = 20.0;
-    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
-    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+    protected static final double COUNTS_PER_MOTOR_REV = 56;
+    protected static final double DRIVE_GEAR_REDUCTION = 20.0;
+    protected static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    protected static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double DRIVE_SPEED = 1;
-    static final double TURN_SPEED = 0.3;
+    protected static final double DRIVE_SPEED = 0.7;
+    protected static final double TURN_SPEED = 0.3;
+    protected static final double INCH_ANGLE_RATIO = 11/90;
 
-    DigitalChannel liftBottomSwitch;  // Hardware Device Object, 0 is bottom switch, Blue wire
-    DigitalChannel liftTopSwitch;  // Hardware Device Object, 1 is top switch, White wire
+    protected DigitalChannel liftBottomSwitch;  // Hardware Device Object, 0 is bottom switch, Blue wire
+    protected DigitalChannel liftTopSwitch;  // Hardware Device Object, 1 is top switch, White wire
 
-    DcMotor liftMotor;
-    DcMotor leftMotor;
-    DcMotor rightMotor;
-    DcMotor armMotor;
+    protected DcMotor liftMotor;
+    protected DcMotor leftMotor;
+    protected DcMotor rightMotor;
+    protected DcMotor armMotor;
 
-    Servo hookServo;
-    Servo markerServo;
+    protected Servo hookServo;
+    protected Servo markerServo;
 
-    double liftPower = .8;
+    protected double liftPower = .8;
 
-    int step = 0;
-    int driveStarted = 0;
-    float lastSpeed = 0;
-    boolean isDocked = true;
-    boolean undocking = false;
-    boolean docking = false;
-    boolean isHooked = false;
-    boolean tankMode = true;
+    protected int step = 0;
+    protected int driveStarted = 0;
+    protected float lastSpeed = 0;
+    protected boolean isDocked = true;
+    protected boolean undocking = false;
+    protected boolean docking = false;
+    protected boolean isHooked = false;
+    protected boolean tankMode = true;
 
-    double leftPOV;
-    double rightPOV;
-    double drivePOV;
-    double turnPOV;
-    double maxPOV;
+    protected double leftPOV;
+    protected double rightPOV;
+    protected double drivePOV;
+    protected double turnPOV;
+    protected double maxPOV;
 
     /*    private GoldAlignDetector detector;*/
 
-
-    @Override
-    public void runOpMode() {
-
-        // get a reference to our digitalTouch object.
+    protected void initRobot()
+    {
         liftBottomSwitch = hardwareMap.get(DigitalChannel.class, "liftBottomLimit"); // 0 is bottom switch, Blue wire
         liftTopSwitch = hardwareMap.get(DigitalChannel.class, "liftTopLimit"); // 1 is top switch, White wire
 
@@ -110,6 +108,17 @@ public class JTHOpMode extends LinearOpMode {
         telemetry.addData(">", "Press Start....");
         telemetry.update();
 
+        /*enableMineralDetector();*/
+
+
+    }
+
+
+    @Override
+    public void runOpMode() {
+
+        // get a reference to our digitalTouch object.
+        initRobot();
         /*enableMineralDetector();*/
 
         waitForStart();
@@ -209,12 +218,6 @@ public class JTHOpMode extends LinearOpMode {
             } else {
                 encoderDrive(TURN_SPEED, -2, 2, 4.0);  // S2: Turn Right 2 Inches with 4 Sec timeout
             }*/
-
-            encoderDrive(DRIVE_SPEED, 6, 6, 5.0);  // S1: Forward 6 Inches with 5 Sec timeout
-            encoderDrive(TURN_SPEED, 2, -2, 4.0);  // S2: Turn Right 2 Inches with 4 Sec timeout
-            encoderDrive(DRIVE_SPEED, 6, 6, 4.0);  // S3: Forward 6 Inches with 4 Sec timeout
-            encoderDrive(TURN_SPEED, -2, 2, 4.0);  // S4: Turn 2 Inches with 4 Sec timeout
-            encoderDrive(DRIVE_SPEED, 40, 40, 4.0);  // S5: Forward 40 Inches with 4 Sec timeout
 
             undocking = false;
         }
@@ -333,6 +336,27 @@ public class JTHOpMode extends LinearOpMode {
         leftMotor.setPower(-leftPOV);
         rightMotor.setPower(-rightPOV);
     }
+
+    public void driveForward( double inches, double timeoutS)
+    {
+        encoderDrive(DRIVE_SPEED, -inches, -inches, timeoutS);
+    }
+
+    public void driveReverse( double inches, double timeoutS)
+    {
+        encoderDrive(DRIVE_SPEED, inches, inches, timeoutS);
+    }
+
+    public void turnRight(int angle)
+    {
+        encoderDrive(TURN_SPEED, angle * INCH_ANGLE_RATIO, -1 * angle *INCH_ANGLE_RATIO, 3);
+    }
+
+    public void turnLeft(int angle)
+    {
+        encoderDrive(TURN_SPEED, -1*angle *INCH_ANGLE_RATIO, angle *INCH_ANGLE_RATIO, 3);
+    }
+
 
     public void encoderDrive(double speed,
                              double leftInches, double rightInches,
