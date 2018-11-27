@@ -25,10 +25,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * 6. Left Bumper: Turn left 2 inches
  * 7. Right Bumper: Turn right 2 inches
  * 8. Guide : It starts gold mineral tracking. Robot should automatically align itself to gold mineral and move towards it. ****NOTE: THIS FEATURE IS COMMENTED OUT FOR NOW****
- * 9. Gamepad 2, left joystick up and down controls arm up and down.
- * 10.GamePad 2, a and b controls game marker servo
- *
+ * 9. Gamepad 2, right joystick up and down controls arm up and down.
+ * 10. Gamepad 2, right joystick left and right controls arm slide.
+ * 11. Gamepad 2, d-pad controls elbow and wrist
+ * 12. GamePad 2, b,x positions the arm for ball pickup and drop off
+ * 13. GamePad 2, left joystick controls drive and turns
  * 13 inches = 90 degrees
+ *
  * L + R - : makes robot turn left when moving forward
  * L - R + : makes robot turn right when moving forward
  * L + R - : makes robot turn right when moving backward
@@ -48,9 +51,20 @@ public class JTHOpMode extends LinearOpMode {
     protected static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     protected static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    protected static final double DRIVE_SPEED = 0.7;
-    protected static final double TURN_SPEED = 0.3;
+    protected static final double DRIVE_SPEED = 1;
+    protected static final double TURN_SPEED = 0.7;
     protected static final double INCH_ANGLE_RATIO = 11/90;
+    
+    static final double DRIVE_SPEED_PRECISE = 0.7;
+    static final double TURN_SPEED_PRECISE = 0.5;
+    static final double ARM_SPEED = 0.5;
+    static final double ARM_SLIDE_SPEED = 0.8;
+    static final double ARM_SLIDE_HOME_SPEED = 0.5;
+
+    static final double WRIST_HOME = 0.2;
+    static final double ELBOW_HOME = 0.05;
+    static final int ARM_MAX = 2000;
+    static final int ARM_SLIDE_MAX = 600;
 
     protected DigitalChannel liftBottomSwitch;  // Hardware Device Object, 0 is bottom switch, Blue wire
     protected DigitalChannel liftTopSwitch;  // Hardware Device Object, 1 is top switch, White wire
@@ -59,9 +73,13 @@ public class JTHOpMode extends LinearOpMode {
     protected DcMotor leftMotor;
     protected DcMotor rightMotor;
     protected DcMotor armMotor;
+    protected DcMotor armSlideMotor;
 
     protected Servo hookServo;
     protected Servo markerServo;
+    protected Servo elbowServo;
+    protected Servo wristServo;
+   
 
     protected double liftPower = .8;
 
@@ -73,7 +91,8 @@ public class JTHOpMode extends LinearOpMode {
     protected boolean docking = false;
     protected boolean isHooked = false;
     protected boolean tankMode = true;
-
+    protected boolean controlArmManually = true;
+    
     protected double leftPOV;
     protected double rightPOV;
     protected double drivePOV;
@@ -98,11 +117,21 @@ public class JTHOpMode extends LinearOpMode {
         leftMotor = hardwareMap.get(DcMotor.class, "left_drive");
         rightMotor = hardwareMap.get(DcMotor.class, "right_drive");
         armMotor = hardwareMap.get(DcMotor.class, "arm_drive");
+        armSlideMotor = hardwareMap.get(DcMotor.class, "arm_slide_drive");
+        
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);        
 
         rightMotor.setDirection(DcMotor.Direction.REVERSE);
 
         hookServo = hardwareMap.get(Servo.class, "hook_servo");
         markerServo = hardwareMap.get(Servo.class, "marker_servo");
+        elbowServo = hardwareMap.get(Servo.class, "elbow_servo");
+        wristServo = hardwareMap.get(Servo.class, "wrist_servo");
+        
 
         // Wait for the start button
         telemetry.addData(">", "Press Start....");
