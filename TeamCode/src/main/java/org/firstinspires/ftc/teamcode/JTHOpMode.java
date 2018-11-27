@@ -316,18 +316,53 @@ public class JTHOpMode extends LinearOpMode {
         leftMotor.setPower(gamepad1.left_stick_y * DRIVE_SPEED);
         rightMotor.setPower(gamepad1.right_stick_y * DRIVE_SPEED);
     }
+    
+    public void driveUsingPOVModePreciseGamePad2() {
+
+        if (gamepad2.left_stick_x != 0) {
+            leftMotor.setPower(-gamepad2.left_stick_x * TURN_SPEED_PRECISE);
+            rightMotor.setPower(gamepad2.left_stick_x * TURN_SPEED_PRECISE);
+        } else {
+
+            drivePOV = gamepad2.left_stick_y * DRIVE_SPEED_PRECISE;
+            turnPOV = -gamepad2.left_stick_x * TURN_SPEED_PRECISE;
+
+            // Combine drive and turn for blended motion.
+            leftPOV = drivePOV - turnPOV;
+            rightPOV = drivePOV + turnPOV;
+
+            // Normalize the values so neither exceed +/- 1.0
+            maxPOV = Math.max(Math.abs(leftPOV), Math.abs(rightPOV));
+            if (maxPOV > 1.0) {
+                leftPOV /= maxPOV;
+                rightPOV /= maxPOV;
+            }
+
+            // Output the safe vales to the motor drives.
+            leftMotor.setPower(-leftPOV);
+            rightMotor.setPower(-rightPOV);
+        }
+    }
 
     public void driveUsingPOVMode() {
+        float x = gamepad1.right_stick_x;
+        float y = -gamepad1.left_stick_y;
+        boolean preciseDrive = false;
 
+        if ((gamepad2.left_stick_x != 0) || (gamepad2.left_stick_y != 0)) {
+            x = gamepad2.left_stick_x;
+            y = -gamepad2.left_stick_y;
+            preciseDrive = true;
+        }
 
-        if (gamepad1.left_stick_y == 0) {
+        if (y == 0) {
             if (lastSpeed != 0) {
                 leftMotor.setPower(0);
                 rightMotor.setPower(0);
                 sleep(300);
             }
             driveStarted = 0;
-        } else if (((lastSpeed > 0) && (gamepad1.left_stick_y < 0)) || ((lastSpeed < 0) && (gamepad1.left_stick_y > 0))) {
+        } else if (((lastSpeed > 0) && (y < 0)) || ((lastSpeed < 0) && (y > 0))) {
             leftMotor.setPower(0);
             rightMotor.setPower(0);
             sleep(300);
@@ -336,19 +371,24 @@ public class JTHOpMode extends LinearOpMode {
             driveStarted++;
         }
 
-        lastSpeed = gamepad1.left_stick_y;
+        lastSpeed = y;
 
 
         // Run wheels in POV mode (note: The joystick goes negative when pushed forwards, so negate it)
         // In this mode the Left stick moves the robot fwd and back, the Right stick turns left and right.
         // This way it's also easy to just drive straight, or just turn.
 
-        if (driveStarted < 100) {
-            drivePOV = -gamepad1.left_stick_y * 0.01 * driveStarted;
+        if ((driveStarted < 100) && (preciseDrive == false)) {
+            drivePOV = -y * 0.01 * driveStarted * DRIVE_SPEED;
+            turnPOV = -x * TURN_SPEED;
+        } else if (preciseDrive == true) {
+            drivePOV = -y * DRIVE_SPEED_PRECISE;
+            turnPOV = -x * TURN_SPEED_PRECISE;
         } else {
-            drivePOV = -gamepad1.left_stick_y;
+            drivePOV = -y * DRIVE_SPEED;
+            turnPOV = -x * TURN_SPEED;
         }
-        turnPOV = -gamepad1.right_stick_x;
+
 
         // Combine drive and turn for blended motion.
         leftPOV = drivePOV - turnPOV;
