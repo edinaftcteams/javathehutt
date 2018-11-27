@@ -54,6 +54,15 @@ public class JTHTeleOp extends JTHOpMode {
 
         // get a reference to our digitalTouch object.
         initRobot();
+        
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        armSlideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        
         waitForStart();
 
         // while the op mode is active, use game pad to drive in tank mode, or initiate dock/un dock procedures
@@ -66,9 +75,85 @@ public class JTHTeleOp extends JTHOpMode {
             telemetry.addData("isDocked", isDocked);
             telemetry.addData("isHooked", isHooked);
             telemetry.addData("Step", step);
+            telemetry.addData("Button1", gamepad1.toString());
+            telemetry.addData("Button2", gamepad2.toString());
+            /* telemetry.addData("Gold position", detector.getXPosition());*/
+
+            telemetry.addData("controlArmManually", controlArmManually);
+
+            telemetry.addData("Arm Slide Position", armSlideMotor.getCurrentPosition());
+            telemetry.addData("Arm Position", armMotor.getCurrentPosition());
+            telemetry.addData("Elbow Position", elbowServo.getPosition());
+            telemetry.addData("Wrist Position", wristServo.getPosition());
             telemetry.update();
 
             driveUsingPOVMode();
+            
+                        if (gamepad2.start == true) {
+                setArmToHome();
+            }
+
+
+            if (gamepad2.dpad_down == true) {
+                wristServo.setPosition(Range.clip(wristServo.getPosition() - 0.01, 0, 1));
+            }
+
+            if (gamepad2.dpad_up == true) {
+                wristServo.setPosition(Range.clip(wristServo.getPosition() + 0.01, 0, 1));
+            }
+
+
+
+            if (gamepad2.x == true) {
+                controlArmManually = false;
+
+                wristServo.setPosition(0);
+                elbowServo.setPosition(0.5);
+
+
+                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armMotor.setTargetPosition(ARM_MAX);
+                armMotor.setPower(ARM_SPEED);
+
+
+                armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armSlideMotor.setTargetPosition(10);
+                armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+            }
+
+            if (gamepad2.b == true) {
+                controlArmManually = false;
+
+                wristServo.setPosition(1);
+                elbowServo.setPosition(0.437);
+
+
+                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armMotor.setTargetPosition(190);
+                armMotor.setPower(ARM_SPEED);
+
+
+                armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armSlideMotor.setTargetPosition(590);
+                armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+            }
+
+            if (gamepad2.right_bumper == true) {
+                wristServo.setPosition(0.5);
+            }
+
+            if (gamepad2.left_bumper == true) {
+                wristServo.setPosition(1);
+            }
+
+            if (gamepad2.dpad_right == true) {
+                elbowServo.setPosition(Range.clip(elbowServo.getPosition() - 0.01, 0, 1));
+            }
+
+            if (gamepad2.dpad_left == true) {
+                elbowServo.setPosition(Range.clip(elbowServo.getPosition() + 0.01, 0, 1));
+            }
+
 
             if (gamepad1.left_trigger >0) {
                 markerServo.setPosition(0);
@@ -78,43 +163,40 @@ public class JTHTeleOp extends JTHOpMode {
                 armMotor.setPower(-gamepad2.left_stick_y * DRIVE_SPEED);
             }
 
-            if (gamepad1.a == true) {
-                dock();
-//            } else if (gamepad1.b == true) {
-//                unDock();
+            if (gamepad1.start == true) {
+                unDock();
             } else if (gamepad1.x == true) {
-                encoderDrive(DRIVE_SPEED, 4, 4, 2.0);  // Backward
-            }
-            else if (gamepad1.y == true) {
-                encoderDrive(DRIVE_SPEED, -4, -4, 2.0);  // Forward 4 Inches with 2 Sec timeout
+                encoderDrive(TURN_SPEED_PRECISE, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
+            } else if (gamepad1.b == true) {
+                encoderDrive(TURN_SPEED_PRECISE, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
+            } else if (gamepad1.y == true) {
+                encoderDrive(DRIVE_SPEED_PRECISE, -4, -4, 2.0);  // Forward 4 Inches with 2 Sec timeout
+            } else if (gamepad1.a == true) {
+                encoderDrive(DRIVE_SPEED_PRECISE, 4, 4, 2.0);  // Backward 4 Inches with 2 Sec timeout
             } else if (gamepad1.left_bumper == true) {
-                encoderDrive(TURN_SPEED, 6, -6, 1.0);  // left turn 2 Inches with 1 Sec timeout
+                encoderDrive(TURN_SPEED, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
             } else if (gamepad1.right_bumper == true) {
-                encoderDrive(TURN_SPEED, 12, -12, 1.0);  // right turn 2 Inches with 1 Sec timeout
+                encoderDrive(TURN_SPEED, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
             } else if (gamepad1.dpad_down == true) {
                 lowerTheHook();
             } else if (gamepad1.dpad_up == true) {
                 liftTheHook();
             } else if (gamepad1.dpad_right == true) {
                 unHook();
-            }
-              else if (gamepad1.left_bumper){
-                //drop marker
             } else if (gamepad1.dpad_left == true) {
                 hook();
-            } else if (gamepad1.start == true) {
-                tankMode = !tankMode;
-            } else if (gamepad1.guide == true) {
-                //trackGoldMineral();
-            } else if (gamepad1.back == true) {
-                docking = false;
-                undocking = false;
             } else if ((docking == false) && (undocking == false)) {
-                if (tankMode == true) {
-                    driveUsingTankMode();
-                } else {
-                    driveUsingPOVMode();
+                driveUsingPOVMode();
+
+                if ((gamepad2.right_stick_y != 0) || (gamepad2.right_stick_x != 0)) {
+                    setArmToManualControl();
                 }
+
+                if (controlArmManually == true) {
+                    armMotor.setPower(-gamepad2.right_stick_y * ARM_SPEED);
+                    armSlideMotor.setPower(gamepad2.right_stick_x * ARM_SLIDE_SPEED);
+                }
+
             }
 
         }
