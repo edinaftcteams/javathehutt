@@ -66,14 +66,31 @@ public class JTHAutonomous extends JTHOpMode {
             telemetry.update();
 
             unDock();
+//high noon
+            openArm();
 
-            encoderDrive(DRIVE_SPEED, 60, 60, 2.0);  // Forward 4 Inches with 2 Sec timeout
+            encoderDrive(DRIVE_SPEED, 45, 45, 5.0);  // Forward 4 Inches with 2 Sec timeout
+
+            sleep(500);
 
             markerServo.setPosition(0);
 
-            encoderDrive(TURN_SPEED, 7, -7, 2.0);  // Backward 4 Inches with 2 Sec timeout
+            encoderDrive(TURN_SPEED, 9, -9, 2.0);  // Backward 4 Inches with 2 Sec timeout
 
             encoderDrive(DRIVE_SPEED, -90, -90, 6.0);  // left turn 2 Inches with 1 Sec timeout
+
+            wristServo.setPosition(0);
+            elbowServo.setPosition(0.5);
+
+
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(ARM_MAX);
+            armMotor.setPower(ARM_SPEED);
+
+
+            armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armSlideMotor.setTargetPosition(10);
+            armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
             break;
         }
     }

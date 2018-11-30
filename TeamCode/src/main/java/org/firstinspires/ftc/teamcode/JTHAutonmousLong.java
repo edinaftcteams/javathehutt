@@ -69,24 +69,25 @@ public class JTHAutonmousLong extends JTHOpMode {
             telemetry.addData("Step", step);
             telemetry.update();
 
+
             unDock();
 
-            driveReverse( 40, 2.0);  // Forward 4 Inches with 2 Sec timeout
+            driveReverse( 26, 10.0);  // Forward 4 Inches with 2 Sec timeout
 
-            encoderDrive(TURN_SPEED, -12, 12, 2.0);
-            // Backward 4 Inches with 2 Sec timeout
+            encoderDrive(TURN_SPEED, 12, -12, 10.0);
 
-            driveForward(30, 6.0);  // left turn 2 Inches with 1 Sec timeout
+            driveReverse(20, 10.0);  // left turn 2 Inches with 1 Sec timeout
 
-            encoderDrive(TURN_SPEED, -1, 1, 2.0);
+            encoderDrive(TURN_SPEED, 10, -10, 10);
 
-            driveForward(40, 5.0);
+            driveReverse(53, 10.0);
 
             markerServo.setPosition(0);
+            sleep(200);
+            //encoderDrive(TURN_SPEED, -6, 6, 10.0);
 
-            encoderDrive(TURN_SPEED, -1, 1, 2.0);
-
-            driveReverse(100, 6);
+            driveForward(85, 10);
+            break;
         }
     }
 

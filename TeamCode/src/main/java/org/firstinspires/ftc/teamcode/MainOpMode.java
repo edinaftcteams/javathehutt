@@ -1,9 +1,38 @@
-package org.firstinspires.ftc.teamcode;
+/* Copyright (c) 2017 FIRST. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted (subject to the limitations in the disclaimer below) provided that
+ * the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this list
+ * of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of FIRST nor the names of its contributors may be used to endorse or
+ * promote products derived from this software without specific prior written permission.
+ *
+ * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+ * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
+package org.firstinspires.ftc.teamcode;
 
 /*import com.disnodeteam.dogecv.CameraViewDisplay;
 import com.disnodeteam.dogecv.DogeCV;
 import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;*/
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,6 +42,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 /*
+ * Sample code for JavaTheHUTT - Raj Kammela 11/19/2018
  * 1. Two drive modes. Start button toggles between the modes. Default is Tank mode. You can see if robot is in Tank mode or not in driver station telemetry log
  *    a. Tank mode : control left motor with left stick, right motor with right stick
  *    b. POV mode  : Left stick controls forward/back word movement, like accelerator in the car. Right stick controls turns, like steering wheel.
@@ -31,79 +61,74 @@ import com.qualcomm.robotcore.util.Range;
  * 11. Gamepad 2, d-pad controls elbow and wrist
  * 12. GamePad 2, b,x positions the arm for ball pickup and drop off
  * 13. GamePad 2, left joystick controls drive and turns
- * 13 inches = 90 degrees
- *
- * L + R - : makes robot turn left when moving forward
- * L - R + : makes robot turn right when moving forward
- * L + R - : makes robot turn right when moving backward
- * L - R + : makes robot turn left when moving backward
- * Field = 12' by 12 '
- * Each square is 2' x 2' ( 24" x 24")
- * Diagonal is 33.6"
- *
  */
-public class JTHOpMode extends LinearOpMode {
+@TeleOp(name = "Proto: Main (Raj)", group = "Proto")
+public class MainOpMode extends LinearOpMode {
 
 
-    protected ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime runtime = new ElapsedTime();
 
-    protected static final double COUNTS_PER_MOTOR_REV = 56;
-    protected static final double DRIVE_GEAR_REDUCTION = 20.0;
-    protected static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
-    protected static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+    static final double COUNTS_PER_MOTOR_REV = 56;
+    static final double DRIVE_GEAR_REDUCTION = 20.0;
+    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    protected static final double DRIVE_SPEED = 0.7;
-    protected static final double TURN_SPEED = 0.7;
-    protected static final double INCH_ANGLE_RATIO = 11/90;
-    
+    static final double DRIVE_SPEED = 1;
+    static final double TURN_SPEED = 0.7;
+
+
     static final double DRIVE_SPEED_PRECISE = 0.7;
     static final double TURN_SPEED_PRECISE = 0.5;
     static final double ARM_SPEED = 0.5;
     static final double ARM_SLIDE_SPEED = 0.8;
     static final double ARM_SLIDE_HOME_SPEED = 0.5;
 
+
     static final double WRIST_HOME = 0.2;
     static final double ELBOW_HOME = 0.05;
     static final int ARM_MAX = 2000;
     static final int ARM_SLIDE_MAX = 600;
 
-    protected DigitalChannel liftBottomSwitch;  // Hardware Device Object, 0 is bottom switch, Blue wire
-    protected DigitalChannel liftTopSwitch;  // Hardware Device Object, 1 is top switch, White wire
 
-    protected DcMotor liftMotor;
-    protected DcMotor leftMotor;
-    protected DcMotor rightMotor;
-    protected DcMotor armMotor;
-    protected DcMotor armSlideMotor;
+    DigitalChannel liftBottomSwitch;  // Hardware Device Object, 0 is bottom switch, Blue wire
+    DigitalChannel liftTopSwitch;  // Hardware Device Object, 1 is top switch, White wire
 
-    protected Servo hookServo;
-    protected Servo markerServo;
-    protected Servo elbowServo;
-    protected Servo wristServo;
-   
+    DcMotor liftMotor;
+    DcMotor leftMotor;
+    DcMotor rightMotor;
+    DcMotor armMotor;
+    DcMotor armSlideMotor;
 
-    protected double liftPower = .8;
+    Servo hookServo;
+    Servo markerServo;
+    Servo elbowServo;
+    Servo wristServo;
 
-    protected int step = 0;
-    protected int driveStarted = 0;
-    protected float lastSpeed = 0;
-    protected boolean isDocked = true;
-    protected boolean undocking = false;
-    protected boolean docking = false;
-    protected boolean isHooked = false;
-    protected boolean tankMode = true;
-    protected boolean controlArmManually = true;
-    
-    protected double leftPOV;
-    protected double rightPOV;
-    protected double drivePOV;
-    protected double turnPOV;
-    protected double maxPOV;
+    double liftPower = .8;
+
+    int step = 0;
+    int driveStarted = 0;
+    float lastSpeed = 0;
+    boolean isDocked = true;
+    boolean undocking = false;
+    boolean docking = false;
+    boolean isHooked = false;
+    boolean tankMode = false;
+    boolean controlArmManually = true;
+
+    double leftPOV;
+    double rightPOV;
+    double drivePOV;
+    double turnPOV;
+    double maxPOV;
 
     /*    private GoldAlignDetector detector;*/
 
-    protected void initRobot()
-    {
+
+    @Override
+    public void runOpMode() {
+
+        // get a reference to our digitalTouch object.
         liftBottomSwitch = hardwareMap.get(DigitalChannel.class, "liftBottomLimit"); // 0 is bottom switch, Blue wire
         liftTopSwitch = hardwareMap.get(DigitalChannel.class, "liftTopLimit"); // 1 is top switch, White wire
 
@@ -119,12 +144,13 @@ public class JTHOpMode extends LinearOpMode {
         rightMotor = hardwareMap.get(DcMotor.class, "right_drive");
         armMotor = hardwareMap.get(DcMotor.class, "arm_drive");
         armSlideMotor = hardwareMap.get(DcMotor.class, "arm_slide_drive");
-        
+
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         armSlideMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        armSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);        
+        armSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
         rightMotor.setDirection(DcMotor.Direction.REVERSE);
 
@@ -132,7 +158,6 @@ public class JTHOpMode extends LinearOpMode {
         markerServo = hardwareMap.get(Servo.class, "marker_servo");
         elbowServo = hardwareMap.get(Servo.class, "elbow_servo");
         wristServo = hardwareMap.get(Servo.class, "wrist_servo");
-        
 
         // Wait for the start button
         telemetry.addData(">", "Press Start....");
@@ -140,51 +165,118 @@ public class JTHOpMode extends LinearOpMode {
 
         /*enableMineralDetector();*/
 
-
-    }
-
-
-    @Override
-    public void runOpMode() {
-
-        // get a reference to our digitalTouch object.
-        initRobot();
-        /*enableMineralDetector();*/
-
         waitForStart();
+
+
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        armSlideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        //setArmToHome();
+
+
+        //armMotor.setPower(1);
+        //armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // while the op mode is active, use game pad to drive in tank mode, or initiate dock/un dock procedures
         // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
         while (opModeIsActive()) {
 
             telemetry.addLine();
-            telemetry.addData("Button", gamepad1.toString());
-            telemetry.addData("Tank Mode", tankMode);
-            telemetry.addData("isDocked", isDocked);
-            telemetry.addData("isHooked", isHooked);
+            telemetry.addData("Button1", gamepad1.toString());
+            telemetry.addData("Button2", gamepad2.toString());
             /* telemetry.addData("Gold position", detector.getXPosition());*/
-            telemetry.addData("driveStarted", driveStarted);
-            telemetry.addData("left_stick_y", gamepad1.left_stick_y);
+
+            telemetry.addData("controlArmManually", controlArmManually);
+
+            telemetry.addData("Arm Slide Position", armSlideMotor.getCurrentPosition());
+            telemetry.addData("Arm Position", armMotor.getCurrentPosition());
+            telemetry.addData("Elbow Position", elbowServo.getPosition());
+            telemetry.addData("Wrist Position", wristServo.getPosition());
+
 
             telemetry.update();
 
-            if (gamepad2.a == true) {
-                markerServo.setPosition(0);
-            } else if (gamepad2.b == true) {
-                markerServo.setPosition(1);
-            } else if ((docking == false) && (undocking == false)) {
-                armMotor.setPower(-gamepad2.left_stick_y * DRIVE_SPEED);
+
+            if (gamepad2.start == true) {
+                setArmToHome();
             }
 
 
-            if (gamepad1.a == true) {
-                dock();
-            } else if (gamepad1.b == true) {
+            if (gamepad2.dpad_down == true) {
+                wristServo.setPosition(Range.clip(wristServo.getPosition() - 0.01, 0, 1));
+            }
+
+            if (gamepad2.dpad_up == true) {
+                wristServo.setPosition(Range.clip(wristServo.getPosition() + 0.01, 0, 1));
+            }
+
+
+
+            if (gamepad2.x == true) {
+                controlArmManually = false;
+
+                wristServo.setPosition(0);
+                elbowServo.setPosition(0.5);
+
+
+                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armMotor.setTargetPosition(ARM_MAX);
+                armMotor.setPower(ARM_SPEED);
+
+
+                armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armSlideMotor.setTargetPosition(10);
+                armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+            }
+
+            if (gamepad2.b == true) {
+                controlArmManually = false;
+
+                wristServo.setPosition(1);
+                elbowServo.setPosition(0.437);
+
+
+                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armMotor.setTargetPosition(190);
+                armMotor.setPower(ARM_SPEED);
+
+
+                armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armSlideMotor.setTargetPosition(590);
+                armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+            }
+
+            if (gamepad2.right_bumper == true) {
+                wristServo.setPosition(0.5);
+            }
+
+            if (gamepad2.left_bumper == true) {
+                wristServo.setPosition(1);
+            }
+
+            if (gamepad2.dpad_right == true) {
+                elbowServo.setPosition(Range.clip(elbowServo.getPosition() - 0.01, 0, 1));
+            }
+
+            if (gamepad2.dpad_left == true) {
+                elbowServo.setPosition(Range.clip(elbowServo.getPosition() + 0.01, 0, 1));
+            }
+
+            if (gamepad1.start == true) {
                 unDock();
             } else if (gamepad1.x == true) {
-                encoderDrive(DRIVE_SPEED, -4, -4, 2.0);  // Forward 4 Inches with 2 Sec timeout
+                encoderDrive(TURN_SPEED_PRECISE, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
+            } else if (gamepad1.b == true) {
+                encoderDrive(TURN_SPEED_PRECISE, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
             } else if (gamepad1.y == true) {
-                encoderDrive(DRIVE_SPEED, 4, 4, 2.0);  // Backward 4 Inches with 2 Sec timeout
+                encoderDrive(DRIVE_SPEED_PRECISE, -4, -4, 2.0);  // Forward 4 Inches with 2 Sec timeout
+            } else if (gamepad1.a == true) {
+                encoderDrive(DRIVE_SPEED_PRECISE, 4, 4, 2.0);  // Backward 4 Inches with 2 Sec timeout
             } else if (gamepad1.left_bumper == true) {
                 encoderDrive(TURN_SPEED, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
             } else if (gamepad1.right_bumper == true) {
@@ -197,43 +289,21 @@ public class JTHOpMode extends LinearOpMode {
                 unHook();
             } else if (gamepad1.dpad_left == true) {
                 hook();
-            } else if (gamepad1.start == true) {
-                tankMode = !tankMode;
-           /* } else if (gamepad1.guide == true) {
-                trackGoldMineral();*/
-            } else if (gamepad1.back == true) {
-                docking = false;
-                undocking = false;
             } else if ((docking == false) && (undocking == false)) {
-                if (tankMode == true) {
-                    driveUsingTankMode();
-                } else {
-                    driveUsingPOVMode();
+                driveUsingPOVMode();
+
+                if ((gamepad2.right_stick_y != 0) || (gamepad2.right_stick_x != 0)) {
+                    setArmToManualControl();
                 }
+
+                if (controlArmManually == true) {
+                    armMotor.setPower(-gamepad2.right_stick_y * ARM_SPEED);
+                    armSlideMotor.setPower(gamepad2.right_stick_x * ARM_SLIDE_SPEED);
+                }
+
             }
 
         }
-
-    }
-
-    public void angle(int inches){
-       // encoderDrive(TURN_SPEED, );//12 inches is 90 degrees
-    }
-
-    public void openArm()
-    {
-        wristServo.setPosition(1);
-        elbowServo.setPosition(0.437);
-
-
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(190);
-        armMotor.setPower(ARM_SPEED);
-
-
-        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armSlideMotor.setTargetPosition(590);
-        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
 
     }
 
@@ -272,7 +342,6 @@ public class JTHOpMode extends LinearOpMode {
         }
     }
 
-
     public void unDock() {
 
         if ((docking == false) && (undocking == false)) {
@@ -305,6 +374,12 @@ public class JTHOpMode extends LinearOpMode {
             } else {
                 encoderDrive(TURN_SPEED, -2, 2, 4.0);  // S2: Turn Right 2 Inches with 4 Sec timeout
             }*/
+
+            encoderDrive(DRIVE_SPEED, 6, 6, 5.0);  // S1: Forward 6 Inches with 5 Sec timeout
+            encoderDrive(TURN_SPEED, 2, -2, 4.0);  // S2: Turn Right 2 Inches with 4 Sec timeout
+            encoderDrive(DRIVE_SPEED, 6, 6, 4.0);  // S3: Forward 6 Inches with 4 Sec timeout
+            encoderDrive(TURN_SPEED, -2, 2, 4.0);  // S4: Turn 2 Inches with 4 Sec timeout
+            encoderDrive(DRIVE_SPEED, 40, 40, 4.0);  // S5: Forward 40 Inches with 4 Sec timeout
 
             undocking = false;
         }
@@ -359,13 +434,13 @@ public class JTHOpMode extends LinearOpMode {
     }
 
     public boolean hook() {
-        hookServo.setPosition(0);
+        hookServo.setPosition(0.7);
         isHooked = true;
         return true;
     }
 
     public boolean unHook() {
-        hookServo.setPosition(1);
+        hookServo.setPosition(0.29);
         isHooked = false;
         return true;
     }
@@ -374,7 +449,7 @@ public class JTHOpMode extends LinearOpMode {
         leftMotor.setPower(gamepad1.left_stick_y * DRIVE_SPEED);
         rightMotor.setPower(gamepad1.right_stick_y * DRIVE_SPEED);
     }
-    
+
     public void driveUsingPOVModePreciseGamePad2() {
 
         if (gamepad2.left_stick_x != 0) {
@@ -402,7 +477,9 @@ public class JTHOpMode extends LinearOpMode {
         }
     }
 
+
     public void driveUsingPOVMode() {
+
         float x = gamepad1.right_stick_x;
         float y = -gamepad1.left_stick_y;
         boolean preciseDrive = false;
@@ -464,27 +541,6 @@ public class JTHOpMode extends LinearOpMode {
         rightMotor.setPower(-rightPOV);
     }
 
-    public void driveForward( double inches, double timeoutS)
-    {
-        encoderDrive(DRIVE_SPEED, -inches, -inches, timeoutS);
-    }
-
-    public void driveReverse( double inches, double timeoutS)
-    {
-        encoderDrive(DRIVE_SPEED, inches, inches, timeoutS);
-    }
-
-    public void turnRight(int angle)
-    {
-        encoderDrive(TURN_SPEED, angle * INCH_ANGLE_RATIO, -1 * angle *INCH_ANGLE_RATIO, 3);
-    }
-
-    public void turnLeft(int angle)
-    {
-        encoderDrive(TURN_SPEED, -1*angle *INCH_ANGLE_RATIO, angle *INCH_ANGLE_RATIO, 3);
-    }
-
-
     public void encoderDrive(double speed,
                              double leftInches, double rightInches,
                              double timeoutS) {
@@ -539,35 +595,5 @@ public class JTHOpMode extends LinearOpMode {
         }
     }
 
-    /*    public void enableMineralDetector() {
-        // Set up detector
-        detector = new GoldAlignDetector(); // Create detector
-        detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance()); // Initialize it with the app context and camera
-        detector.useDefaults(); // Set detector to use default settings
-
-        // Optional tuning
-        detector.alignSize = 100; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
-        detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
-        detector.downscale = 0.4; // How much to downscale the input frames
-
-        detector.areaScoringMethod = DogeCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
-        //detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
-        detector.maxAreaScorer.weight = 0.005; //
-
-        detector.ratioScorer.weight = 5; //
-        detector.ratioScorer.perfectRatio = 1.0; // Ratio adjustment
-
-        detector.enable(); // Start the detector!
-    }
-
-    public void trackGoldMineral() {
-        if (detector.getAligned()) {
-            encoderDrive(TURN_SPEED, 2, 2, 4.0);  // S5: Forward 40 Inches with 4 Sec timeout
-        } else if (detector.getXPosition() < 300) {
-            encoderDrive(TURN_SPEED, 1, -1, 4.0);  // S2: Turn left 2 Inches with 4 Sec timeout
-        } else {
-            encoderDrive(TURN_SPEED, -1, 1, 4.0);  // S2: Turn Right 2 Inches with 4 Sec timeout
-        }
-    }*/
 
 }

@@ -29,6 +29,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
 
 /*
  * Sample code for JavaTheHUTT - Raj Kammela 11/11/2018
@@ -136,6 +138,11 @@ public class JTHTeleOp extends JTHOpMode {
                 armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 armSlideMotor.setTargetPosition(590);
                 armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+            }
+
+            if (gamepad2.y == true) {
+                wristServo.setPosition(0.5);
+                elbowServo.setPosition(Range.clip(elbowServo.getPosition() + 0.01, 0, 1));
             }
 
             if (gamepad2.right_bumper == true) {
