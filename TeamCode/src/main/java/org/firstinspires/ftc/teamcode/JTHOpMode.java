@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 /*
- * Sample code for JavaTheHUTT - Raj Kammela 11/19/2018
  * 1. Two drive modes. Start button toggles between the modes. Default is Tank mode. You can see if robot is in Tank mode or not in driver station telemetry log
  *    a. Tank mode : control left motor with left stick, right motor with right stick
  *    b. POV mode  : Left stick controls forward/back word movement, like accelerator in the car. Right stick controls turns, like steering wheel.
