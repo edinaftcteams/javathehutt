@@ -22,12 +22,7 @@ package org.firstinspires.ftc.teamcode;
 //import com.disnodeteam.dogecv.DogeCV;
 //import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
  * Sample code for JavaTheHUTT - Raj Kammela 11/11/2018
@@ -43,7 +38,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * 7. Right Bumper: Turn right 2 inches
  */
 @Autonomous(name = "JTH Autonomous Short", group = "JTH")
-public class JTHAutonomous extends JTHOpMode {
+public class JTHAutonomous extends JTHOpModeOld {
 
 
     @Override

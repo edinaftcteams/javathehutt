@@ -23,12 +23,8 @@ package org.firstinspires.ftc.teamcode;
 //import com.disnodeteam.dogecv.CameraViewDisplay;
 //import com.disnodeteam.dogecv.DogeCV;
 //import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
@@ -46,7 +42,7 @@ import com.qualcomm.robotcore.util.Range;
  * 7. Right Bumper: Turn right 2 inches
  */
 @TeleOp(name = "JTH Teleop", group = "JTH")
-public class JTHTeleOp extends JTHOpMode {
+public class JTHTeleOpOld extends JTHOpModeOld {
 
 
 

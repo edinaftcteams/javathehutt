@@ -22,7 +22,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
         import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@Autonomous(name="JTHAutonomousIMU", group="JTH")
+//@Autonomous(name="JTHAutonomousIMU", group="JTH")
 //@Disabled
 public class JTHAutonomousIMU extends LinearOpMode
 {

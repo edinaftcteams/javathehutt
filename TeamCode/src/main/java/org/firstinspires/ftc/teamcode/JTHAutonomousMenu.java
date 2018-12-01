@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-@Autonomous(name="Menu Test", group="JTH")
-public class JTHAutonomousMenu extends JTHOpMode {
+
+//@Autonomous(name="Menu Test", group="JTH")
+public class JTHAutonomousMenu extends JTHOpModeOld {
     private AutonomousConfiguration autoConfig;
     // The properties are available after the
     // call to the ShowMenu method of the AutonomousConfiguration class.
