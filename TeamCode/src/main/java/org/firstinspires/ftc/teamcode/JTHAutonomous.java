@@ -44,6 +44,7 @@ public class JTHAutonomous extends JTHOpModeOld {
     @Override
     public void runOpMode() {
 
+
         // get a reference to our digitalTouch object.
         initRobot();
         waitForStart();
