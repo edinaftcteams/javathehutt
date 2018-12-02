@@ -42,45 +42,48 @@ public class JTHAutoCrater extends JTHOpMode {
             unHook();
             sleep(200);
 
-            showMessageOnDriverStation("C1  : Drive Forward ____");
-            driveForward(45, 5.0);
+
+            moveArmUp();
+
+            showMessageOnDriverStation("C1  : Drive Forward 11");
+            driveForward(11, 5.0);
             sleep(200);
 
 
-            showMessageOnDriverStation("C2  : Turn Left ____°");
+            showMessageOnDriverStation("C2  : Turn Left 80°");
+            turnLeft(80);
+            sleep(200);
+
+            showMessageOnDriverStation("C3  : Drive Forward 34");
+            driveForward(34, 5.0);
+            sleep(200);
+
+            showMessageOnDriverStation("C4  : Turn Left 45°");
             turnLeft(45);
             sleep(200);
 
-            showMessageOnDriverStation("C3  : Drive Forward ____");
-            driveForward(45, 5.0);
-            sleep(200);
-
-            showMessageOnDriverStation("C4  : Turn Left ____°");
-            turnLeft(45);
-            sleep(200);
-
-            showMessageOnDriverStation("C5  : Drive Forward ____");
-            driveForward(45, 5.0);
+            showMessageOnDriverStation("C5  : Drive Forward 27");
+            driveForward(27, 5.0);
             sleep(200);
 
             showMessageOnDriverStation("C6  : Drop Marker");
             dropMarker();
             sleep(200);
 
-            showMessageOnDriverStation("C7  : Right Turn ____°");
-            turnRight(45);
+            showMessageOnDriverStation("C7  : Right Turn 185°");
+            turnRight(185);
             sleep(200);
 
-            showMessageOnDriverStation("C8  :Drive Forward ____");
-            driveForward(45, 5.0);
+            showMessageOnDriverStation("C8  :Drive Forward 30");
+            driveForward(30, 5.0);
             sleep(200);
 
             showMessageOnDriverStation("C9  :Extend Arm");
             reachIntoCrater();
             sleep(200);
 
-            showMessageOnDriverStation("C10: Drive Forward ____");
-            driveForward(45, 5.0);
+            showMessageOnDriverStation("C10: Drive Forward 14");
+            driveForward(14, 5.0);
             sleep(200);
 
             break;

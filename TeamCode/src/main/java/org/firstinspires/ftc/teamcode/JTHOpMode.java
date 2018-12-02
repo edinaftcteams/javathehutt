@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 /*
+ * Sample code for JavaTheHUTT - Raj Kammela 11/19/2018
  * 1. Two drive modes. Start button toggles between the modes. Default is Tank mode. You can see if robot is in Tank mode or not in driver station telemetry log
  *    a. Tank mode : control left motor with left stick, right motor with right stick
  *    b. POV mode  : Left stick controls forward/back word movement, like accelerator in the car. Right stick controls turns, like steering wheel.
@@ -39,8 +40,8 @@ public class JTHOpMode extends LinearOpMode {
     protected static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     protected static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    protected static final double DRIVE_SPEED = 1;
-    protected static final double TURN_SPEED = 0.7;
+    protected static final double DRIVE_SPEED = 0.8;
+    protected static final double TURN_SPEED = 0.5;
     protected static final double INCH_ANGLE_RATIO = 11 / 90;
     protected static final double LIFT_POWER = 1;
 
@@ -53,7 +54,7 @@ public class JTHOpMode extends LinearOpMode {
 
     protected static final double WRIST_HOME = 0.2;
     protected static final double ELBOW_HOME = 0.05;
-    protected static final int ARM_MAX = 2000;
+    protected static final int ARM_MAX = 1900;
     protected static final int ARM_SLIDE_MAX = 600;
 
 
@@ -61,7 +62,6 @@ public class JTHOpMode extends LinearOpMode {
     protected DigitalChannel liftTopSwitch;  // Hardware Device Object, 1 is top switch, White wire
     protected DigitalChannel armStartLimit;
     protected DigitalChannel armSlideStartLimit;
-
 
     protected DcMotor liftMotor;
     protected DcMotor leftMotor;
@@ -155,6 +155,11 @@ public class JTHOpMode extends LinearOpMode {
         initRobot();
         telemetry.addLine("Mapped hardware");
 
+
+       /* driveReverse(11, 5);
+        telemetry.addLine("Drove Back a little");
+        sleep(200);
+*/
         initArm();
         telemetry.addLine("Arm set to home");
 
@@ -226,6 +231,14 @@ public class JTHOpMode extends LinearOpMode {
 
 
             } else {
+
+                /*double myAngle = -1 * 90 * inchAngleRatio;
+
+                telemetry.addData("inchAngleRatio", inchAngleRatio);
+                telemetry.addData("INCH_ANGLE_RATIO", INCH_ANGLE_RATIO);
+                telemetry.addData("Check angle", -1 * 90 * inchAngleRatio);
+                telemetry.addData("Check angle", myAngle);*/
+
                 telemetry.addData("You are in drive mode!!", "Have fun");
 
                 telemetry.addData("armStartLimit", armStartLimit.getState());
@@ -264,9 +277,32 @@ public class JTHOpMode extends LinearOpMode {
                     reachIntoCrater();
                 }
 
+
+                if (gamepad2.y == true) {
+                    moveArmHigherThanCrater();
+                }
+
+                if (gamepad2.a == true) {
+                    moveArmDown();
+                }
+
+               /* if (gamepad2.b == true) {
+                    turnRight(rightTurnAngle);
+                    //encoderDrive(turnSpeed, 12, -12, 3);
+                } else if (gamepad2.a == true) {
+                    driveForward(testDriveDistance, 5.0);
+                } else if (gamepad2.x == true) {
+                    turnLeft(leftTurnAngle);
+                    // encoderDrive(turnSpeed, -6, 6, 3);
+                }
+
                 if ((gamepad2.y == true) && (y == false)) {
                     configMode = !configMode;
                 }
+
+                y = gamepad2.y;
+
+*/
 
                 if (gamepad2.right_bumper == true) {
                     wristServo.setPosition(0.5);
@@ -315,7 +351,12 @@ public class JTHOpMode extends LinearOpMode {
                     }
 
                     if (controlArmManually == true) {
-                        armMotor.setPower(-gamepad2.right_stick_y * armSpeed);
+                        if ((armMotor.getCurrentPosition() > 1700) && (gamepad2.right_stick_y < 0)){
+
+                        } else{
+                            armMotor.setPower(-gamepad2.right_stick_y * armSpeed);
+                        }
+
                         armSlideMotor.setPower(gamepad2.right_stick_x * armSlideSpeed);
                     }
 
@@ -347,7 +388,7 @@ public class JTHOpMode extends LinearOpMode {
 
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(190);
+        armMotor.setTargetPosition(200);
         armMotor.setPower(armSpeed);
 
 
@@ -356,11 +397,47 @@ public class JTHOpMode extends LinearOpMode {
         armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
     }
 
+    public void moveArmUp() {
+        controlArmManually = false;
+
+        elbowServo.setPosition(0.437);
+
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(1400);
+        armMotor.setPower(armSpeed);
+
+    }
+
+    public void moveArmHigherThanCrater() {
+        controlArmManually = false;
+
+        //elbowServo.setPosition(0.437);
+
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(400);
+        armMotor.setPower(armSpeed);
+
+    }
+
+    public void moveArmDown() {
+        controlArmManually = false;
+
+        //elbowServo.setPosition(0.437);
+        wristServo.setPosition(0.7);
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(100);
+        armMotor.setPower(armSpeed);
+
+    }
+
     public void reachUptoLander() {
         controlArmManually = false;
 
         wristServo.setPosition(0);
-        elbowServo.setPosition(0.5);
+        elbowServo.setPosition(0.437);
 
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -511,29 +588,30 @@ public class JTHOpMode extends LinearOpMode {
     }
 
     public void driveForward(double inches, double timeoutS) {
-        encoderDrive(driveSpeed, -inches, -inches, timeoutS);
-    }
-
-    public void driveReverse(double inches, double timeoutS) {
         encoderDrive(driveSpeed, inches, inches, timeoutS);
     }
 
+    public void driveReverse(double inches, double timeoutS) {
+        encoderDrive(driveSpeed, -inches, -inches, timeoutS);
+    }
+
     public void turnRight(int angle) {
-        encoderDrive(turnSpeed, angle * inchAngleRatio, -1 * angle * inchAngleRatio, 3);
+        encoderDrive(turnSpeed, -1 * angle * 12 / 90, 1 * angle * 12 / 90, 3);
     }
 
     public void turnLeft(int angle) {
-        encoderDrive(turnSpeed, -1 * angle * inchAngleRatio, angle * inchAngleRatio, 3);
+
+
+        encoderDrive(turnSpeed, 1 * angle * 12 / 90, -1 * angle * 12 / 90, 3);
     }
 
 
     public void initArm() {
 
-        wristServo.setPosition(WRIST_HOME);
-        elbowServo.setPosition(ELBOW_HOME);
-
+        armMotor.setPower(0.3);
         sleep(500);
-        idle();
+
+        armMotor.setPower(0);
 
 
         while (armSlideStartLimit.getState() == true) {
@@ -549,6 +627,11 @@ public class JTHOpMode extends LinearOpMode {
         sleep(500);
         idle();
 
+        wristServo.setPosition(WRIST_HOME);
+        elbowServo.setPosition(ELBOW_HOME);
+
+        sleep(500);
+        idle();
 
         while (armStartLimit.getState() == true) {
             armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -566,6 +649,13 @@ public class JTHOpMode extends LinearOpMode {
 
     public void setArmToHome() {
         controlArmManually = false;
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(500);
+        armMotor.setPower(armSpeed);
+
+        sleep(500);
+        idle();
 
         wristServo.setPosition(WRIST_HOME);
         elbowServo.setPosition(ELBOW_HOME);
@@ -678,13 +768,13 @@ public class JTHOpMode extends LinearOpMode {
     }
 
     public boolean hook() {
-        hookServo.setPosition(0);
+        hookServo.setPosition(0.5);
         isHooked = true;
         return true;
     }
 
     public boolean unHook() {
-        hookServo.setPosition(0.5);
+        hookServo.setPosition(0);
         isHooked = false;
         return true;
     }
@@ -850,7 +940,7 @@ public class JTHOpMode extends LinearOpMode {
 
         telemetry.addLine(msg);
         telemetry.update();
-        sleep(sleepBetweenSteps * 1000);
+        sleep(500);
 
     }
 }
