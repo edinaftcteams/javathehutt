@@ -28,36 +28,36 @@ public class JTHAutoTest extends JTHOpMode {
         while (opModeIsActive()) {
 
 
-            if (gamepad1.start == true) {
+            if (gamepad1.start) {
 
-            } else if (gamepad1.x == true) {
+            } else if (gamepad1.x) {
                 turnLeft(leftTurnAngle);
-            } else if (gamepad1.b == true) {
+            } else if (gamepad1.b) {
                 turnRight(rightTurnAngle);
-            } else if (gamepad1.y == true) {
+            } else if (gamepad1.y) {
                 driveForward(testDriveDistance,5.0);
-            } else if (gamepad1.a == true) {
+            } else if (gamepad1.a) {
                 driveReverse(testDriveDistance,5.0);
-            } else if (gamepad1.left_bumper == true) {
+            } else if (gamepad1.left_bumper) {
 
-            } else if (gamepad1.right_bumper == true) {
+            } else if (gamepad1.right_bumper) {
 
-            } else if (gamepad1.dpad_down == true) {
+            } else if (gamepad1.dpad_down) {
 
-            } else if (gamepad1.dpad_up == true) {
+            } else if (gamepad1.dpad_up) {
 
-            } else if (gamepad1.dpad_right == true) {
+            } else if (gamepad1.dpad_right) {
 
-            } else if (gamepad1.dpad_left == true) {
+            } else if (gamepad1.dpad_left) {
 
-            } else if ((docking == false) && (undocking == false)) {
+            } else {
                 driveUsingPOVMode();
 
                 if ((gamepad2.right_stick_y != 0) || (gamepad2.right_stick_x != 0)) {
                     setArmToManualControl();
                 }
 
-                if (controlArmManually == true) {
+                if (controlArmManually) {
                     armMotor.setPower(-gamepad2.right_stick_y * armSpeed);
                     armSlideMotor.setPower(gamepad2.right_stick_x * armSlideSpeed);
                 }
