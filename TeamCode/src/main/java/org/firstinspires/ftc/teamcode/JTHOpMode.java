@@ -7,6 +7,9 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.disnodeteam.dogecv.CameraViewDisplay;
+import com.disnodeteam.dogecv.DogeCV;
+import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;
 
 /*
  * Sample code for JavaTheHUTT - Raj Kammela 11/19/2018
@@ -107,6 +110,9 @@ public class JTHOpMode extends LinearOpMode {
     protected int rightTurnAngle = 0;
 
 
+    public GoldAlignDetector detector;
+
+
     protected void initRobot() {
         // get a reference to our digitalTouch object.
         liftBottomSwitch = hardwareMap.get(DigitalChannel.class, "liftBottomLimit"); // 0 is bottom switch, Blue wire
@@ -159,15 +165,20 @@ public class JTHOpMode extends LinearOpMode {
        /* driveReverse(11, 5);
         telemetry.addLine("Drove Back a little");
         sleep(200);
-*/
+       */
+
         initArm();
         telemetry.addLine("Arm set to home");
 
         resetArmEncoders();
         telemetry.addLine("Arm encoders reset");
 
+        enableMineralDetector();
+        telemetry.addLine("Gold detector enabled");
+
         telemetry.addLine("Press Start....");
         telemetry.update();
+
         waitForStart();
 
         boolean y = false;
@@ -240,7 +251,7 @@ public class JTHOpMode extends LinearOpMode {
                 telemetry.addData("Check angle", myAngle);*/
 
                 telemetry.addData("You are in drive mode!!", "Have fun");
-
+                telemetry.addData("Gold position", detector.getXPosition());
                 telemetry.addData("armStartLimit", armStartLimit.getState());
                 telemetry.addData("armSlideStartLimit", armSlideStartLimit.getState());
 
@@ -942,5 +953,37 @@ public class JTHOpMode extends LinearOpMode {
         telemetry.update();
         sleep(500);
 
+    }
+
+
+    public void enableMineralDetector() {
+        // Set up detector
+        detector = new GoldAlignDetector(); // Create detector
+        detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance()); // Initialize it with the app context and camera
+        detector.useDefaults(); // Set detector to use default settings
+
+        // Optional tuning
+        detector.alignSize = 100; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
+        detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
+        detector.downscale = 0.4; // How much to downscale the input frames
+
+        detector.areaScoringMethod = DogeCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
+        //detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
+        detector.maxAreaScorer.weight = 0.005; //
+
+        detector.ratioScorer.weight = 5; //
+        detector.ratioScorer.perfectRatio = 1.0; // Ratio adjustment
+
+        detector.enable(); // Start the detector!
+    }
+
+    public void trackGoldMineral() {
+        if (detector.getAligned()) {
+            encoderDrive(TURN_SPEED, 2, 2, 4.0);  // S5: Forward 40 Inches with 4 Sec timeout
+        } else if (detector.getXPosition() < 300) {
+            encoderDrive(TURN_SPEED, 1, -1, 4.0);  // S2: Turn left 2 Inches with 4 Sec timeout
+        } else {
+            encoderDrive(TURN_SPEED, -1, 1, 4.0);  // S2: Turn Right 2 Inches with 4 Sec timeout
+        }
     }
 }

@@ -21,11 +21,20 @@ public class JTHAutoTest extends JTHOpMode {
         resetArmEncoders();
         telemetry.addLine("Arm encoders reset");
 
+        enableMineralDetector();
+        telemetry.addLine("Gold detector enabled");
+
+
         telemetry.addLine("Press Start....");
         telemetry.update();
+
         waitForStart();
 
         while (opModeIsActive()) {
+
+            telemetry.addData("Gold position", detector.getXPosition());
+            telemetry.update();
+
 
 
             if (gamepad1.start) {
