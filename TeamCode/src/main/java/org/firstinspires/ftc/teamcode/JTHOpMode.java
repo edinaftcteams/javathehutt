@@ -55,8 +55,9 @@ public class JTHOpMode extends LinearOpMode {
     protected static final double ARM_SLIDE_HOME_SPEED = 0.5;
 
 
-    protected static final double WRIST_HOME = 0.3;
-    protected static final double ELBOW_HOME = 0.07;
+    protected static final double WRIST_HOME = 0.2;
+    protected static final double ELBOW_HOME = 0.05;
+
     protected static final int ARM_MAX = 1900;
     protected static final int ARM_SLIDE_MAX = 600;
 
@@ -408,6 +409,25 @@ public class JTHOpMode extends LinearOpMode {
         armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
     }
 
+    public void reachOutToMoveGoldMineral() {
+        controlArmManually = false;
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(100);
+        armMotor.setPower(armSpeed);
+
+
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armSlideMotor.setTargetPosition(590);
+        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+        wristServo.setPosition(0.7585);
+        elbowServo.setPosition(0.3766);
+
+    }
+
+
+
     public void moveArmUp() {
         controlArmManually = false;
 
@@ -611,8 +631,6 @@ public class JTHOpMode extends LinearOpMode {
     }
 
     public void turnLeft(int angle) {
-
-
         encoderDrive(turnSpeed, 1 * angle * 12 / 90, -1 * angle * 12 / 90, 3);
     }
 
@@ -656,6 +674,8 @@ public class JTHOpMode extends LinearOpMode {
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
+        wristServo.setPosition(0);
+        elbowServo.setPosition(0.1894);
     }
 
     public void setArmToHome() {
@@ -682,6 +702,9 @@ public class JTHOpMode extends LinearOpMode {
         armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armSlideMotor.setTargetPosition(10);
         armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+        wristServo.setPosition(0);
+        elbowServo.setPosition(0.1894);
 
 
     }
@@ -951,7 +974,7 @@ public class JTHOpMode extends LinearOpMode {
 
         telemetry.addLine(msg);
         telemetry.update();
-        sleep(500);
+        sleep(2000);
 
     }
 
