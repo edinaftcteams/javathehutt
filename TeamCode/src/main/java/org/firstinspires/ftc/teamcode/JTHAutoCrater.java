@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.sql.Driver;
+
 /*
  * Autonomous code : Docked on the lander side facing crater.
  */
@@ -43,6 +45,7 @@ public class JTHAutoCrater extends JTHOpMode {
             sleep(200);
 
 
+            sleep(200);
             moveArmUp();
 
             showMessageOnDriverStation("C1  : Drive Forward 11");

@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+import java.sql.Driver;
 
 /*
  * Test code : To test drive and turn accuracy.
@@ -29,11 +32,39 @@ public class JTHAutoTest extends JTHOpMode {
         telemetry.update();
 
         waitForStart();
+        telemetry.addData("Gold position", detector.getXPosition());
+        telemetry.update();
+
+        controlArmManually = false;
+
+
+
+        reachIntoCrater();
+
+        wristServo.setPosition(0.7585);
+        elbowServo.setPosition(0.3766);
+
+
+
+        /*armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(65);
+        armMotor.setPower(armSpeed);
+        armSlideMotor.setTargetPosition(313);*/
+        if (detector.getXPosition() < 100){//going left
+            encoderDrive(TURN_SPEED, 6, -6, 10);
+            encoderDrive(DRIVE_SPEED, 8, 8, 10);
+        }
+        else if (detector.getXPosition() > 400){//going right
+            encoderDrive(TURN_SPEED, -6, 6, 10);
+            encoderDrive(DRIVE_SPEED, 8, 8, 10);
+        }
+        else {
+            encoderDrive(DRIVE_SPEED, 3.75, 3.75, 10);
+        }
+        sleep(8000);
+        setArmToHome();
 
         while (opModeIsActive()) {
-
-            telemetry.addData("Gold position", detector.getXPosition());
-            telemetry.update();
 
 
 
@@ -70,6 +101,7 @@ public class JTHAutoTest extends JTHOpMode {
                     armMotor.setPower(-gamepad2.right_stick_y * armSpeed);
                     armSlideMotor.setPower(gamepad2.right_stick_x * armSlideSpeed);
                 }
+
 
             }
         }

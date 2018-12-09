@@ -55,8 +55,8 @@ public class JTHOpMode extends LinearOpMode {
     protected static final double ARM_SLIDE_HOME_SPEED = 0.5;
 
 
-    protected static final double WRIST_HOME = 0.2;
-    protected static final double ELBOW_HOME = 0.05;
+    protected static final double WRIST_HOME = 0.3;
+    protected static final double ELBOW_HOME = 0.07;
     protected static final int ARM_MAX = 1900;
     protected static final int ARM_SLIDE_MAX = 600;
 
