@@ -33,6 +33,7 @@ package org.firstinspires.ftc.teamcode;
 import com.disnodeteam.dogecv.DogeCV;
 import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;*/
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -63,6 +64,7 @@ import com.qualcomm.robotcore.util.Range;
  * 13. GamePad 2, left joystick controls drive and turns
  */
 @TeleOp(name = "Proto: Main (Raj)", group = "Proto")
+@Disabled
 public class MainOpMode extends LinearOpMode {
 
 

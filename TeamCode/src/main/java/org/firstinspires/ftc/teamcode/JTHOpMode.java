@@ -413,16 +413,15 @@ public class JTHOpMode extends LinearOpMode {
         controlArmManually = false;
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(100);
+        armMotor.setTargetPosition(200);
         armMotor.setPower(armSpeed);
 
+        wristServo.setPosition(0.7585);
+        elbowServo.setPosition(0.3766);
 
         armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armSlideMotor.setTargetPosition(590);
         armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
-
-        wristServo.setPosition(0.7585);
-        elbowServo.setPosition(0.3766);
 
     }
 
@@ -675,7 +674,7 @@ public class JTHOpMode extends LinearOpMode {
 
 
         wristServo.setPosition(0);
-        elbowServo.setPosition(0.1894);
+        elbowServo.setPosition(0);
     }
 
     public void setArmToHome() {

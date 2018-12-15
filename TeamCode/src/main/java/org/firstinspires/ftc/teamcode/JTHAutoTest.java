@@ -46,6 +46,7 @@ public class JTHAutoTest extends JTHOpMode {
         showMessageOnDriverStation("Reach out to move gold mineral");
         reachOutToMoveGoldMineral();
 
+
         if (detector.getXPosition() < 100) {//going left
             showMessageOnDriverStation("Gold found on the left - " + detector.getXPosition());
 

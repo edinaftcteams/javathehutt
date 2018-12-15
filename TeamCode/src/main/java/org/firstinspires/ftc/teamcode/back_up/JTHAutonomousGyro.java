@@ -76,8 +76,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-//@Autonomous(name="JTHAutonomousGyro", group="Pushbot")
-//@Disabled
+@Autonomous(name = "JTHAutonomousGyro", group = "Pushbot")
+@Disabled
 public class JTHAutonomousGyro extends LinearOpMode {
 
     /* Declare OpMode members. */

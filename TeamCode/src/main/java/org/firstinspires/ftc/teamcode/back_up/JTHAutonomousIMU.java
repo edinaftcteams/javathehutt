@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -20,24 +21,22 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 // Also uses IMU to drive in a straight line when not avoiding an obstacle.
 
 
-        import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-//@Autonomous(name="JTHAutonomousIMU", group="JTH")
-//@Disabled
-public class JTHAutonomousIMU extends LinearOpMode
-{
+@Autonomous(name = "JTHAutonomousIMU", group = "JTH")
+@Disabled
+public class JTHAutonomousIMU extends LinearOpMode {
     DcMotor leftMotor;
-    DcMotor                 rightMotor;
+    DcMotor rightMotor;
     //DigitalChannel touch;
     BNO055IMU imu;
-    Orientation             lastAngles = new Orientation();
+    Orientation lastAngles = new Orientation();
     double globalAngle, power = .30, correction;
-    boolean                 aButton, bButton, touched;
+    boolean aButton, bButton, touched;
 
     // called when init button is  pressed.
     @Override
-    public void runOpMode() throws InterruptedException
-    {
+    public void runOpMode() throws InterruptedException {
         leftMotor = hardwareMap.dcMotor.get("left_drive");
 
         rightMotor = hardwareMap.dcMotor.get("right_drive");
@@ -51,10 +50,10 @@ public class JTHAutonomousIMU extends LinearOpMode
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
-        parameters.mode                = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled      = false;
+        parameters.mode = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled = false;
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
@@ -67,8 +66,7 @@ public class JTHAutonomousIMU extends LinearOpMode
         telemetry.update();
 
         // make sure the imu gyro is calibrated before continuing.
-        while (!isStopRequested() && !imu.isGyroCalibrated())
-        {
+        while (!isStopRequested() && !imu.isGyroCalibrated()) {
             sleep(50);
             idle();
         }
@@ -88,8 +86,7 @@ public class JTHAutonomousIMU extends LinearOpMode
 
         // drive until end of period.
 
-        while (opModeIsActive())
-        {
+        while (opModeIsActive()) {
             // Use gyro to drive in a straight line.
             correction = checkDirection();
 
@@ -115,8 +112,7 @@ public class JTHAutonomousIMU extends LinearOpMode
     /**
      * Resets the cumulative angle tracking to zero.
      */
-    private void resetAngle()
-    {
+    private void resetAngle() {
         lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
         globalAngle = 0;
@@ -124,10 +120,10 @@ public class JTHAutonomousIMU extends LinearOpMode
 
     /**
      * Get current cumulative angle rotation from last reset.
+     *
      * @return Angle in degrees. + = left, - = right.
      */
-    private double getAngle()
-    {
+    private double getAngle() {
         // We experimentally determined the Z axis is the axis we want to use for heading angle.
         // We have to process the angle because the imu works in euler angles so the Z axis is
         // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
@@ -151,10 +147,10 @@ public class JTHAutonomousIMU extends LinearOpMode
 
     /**
      * See if we are moving in a straight line and if not return a power correction value.
+     *
      * @return Power adjustment, + is adjust left - is adjust right.
      */
-    private double checkDirection()
-    {
+    private double checkDirection() {
         // The gain value determines how sensitive the correction is to direction changes.
         // You will have to experiment with your robot to get small smooth direction changes
         // to stay on a straight line.
@@ -174,11 +170,11 @@ public class JTHAutonomousIMU extends LinearOpMode
 
     /**
      * Rotate left or right the number of degrees. Does not support turning more than 180 degrees.
+     *
      * @param degrees Degrees to turn, + is left - is right
      */
-    private void rotate(int degrees, double power)
-    {
-        double  leftPower, rightPower;
+    private void rotate(int degrees, double power) {
+        double leftPower, rightPower;
 
         // restart imu movement tracking.
         resetAngle();
@@ -186,32 +182,29 @@ public class JTHAutonomousIMU extends LinearOpMode
         // getAngle() returns + when rotating counter clockwise (left) and - when rotating
         // clockwise (right).
 
-        if (degrees < 0)
-        {   // turn right.
+        if (degrees < 0) {   // turn right.
             leftPower = -power;
             rightPower = power;
-        }
-        else if (degrees > 0)
-        {   // turn left.
+        } else if (degrees > 0) {   // turn left.
             leftPower = power;
             rightPower = -power;
-        }
-        else return;
+        } else return;
 
         // set power to rotate.
         leftMotor.setPower(leftPower);
         rightMotor.setPower(rightPower);
 
         // rotate until turn is completed.
-        if (degrees < 0)
-        {
+        if (degrees < 0) {
             // On right turn we have to get off zero first.
-            while (opModeIsActive() && getAngle() == 0) {}
+            while (opModeIsActive() && getAngle() == 0) {
+            }
 
-            while (opModeIsActive() && getAngle() > degrees) {}
-        }
-        else    // left turn.
-            while (opModeIsActive() && getAngle() < degrees) {}
+            while (opModeIsActive() && getAngle() > degrees) {
+            }
+        } else    // left turn.
+            while (opModeIsActive() && getAngle() < degrees) {
+            }
 
         // turn the motors off.
         rightMotor.setPower(0);
