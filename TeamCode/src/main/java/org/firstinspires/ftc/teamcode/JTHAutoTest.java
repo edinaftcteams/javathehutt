@@ -64,7 +64,7 @@ public class JTHAutoTest extends JTHOpMode {
             setArmToHome();
 
             showMessageOnDriverStation("Align robot to lander");
-            encoderDrive(TURN_SPEED, 0, -6, 10);
+            encoderDrive(TURN_SPEED, 6, -6, 10);
 
         } else if (detector.getXPosition() > 400) {//going right
             showMessageOnDriverStation("Gold found on the right - " + detector.getXPosition());
@@ -82,7 +82,7 @@ public class JTHAutoTest extends JTHOpMode {
             setArmToHome();
 
             showMessageOnDriverStation("Align robot to lander");
-            encoderDrive(TURN_SPEED, -6, 0, 10);
+            encoderDrive(TURN_SPEED, -6, 6, 10);
 
         } else {
             showMessageOnDriverStation("Gold found in the middle - " + detector.getXPosition());
