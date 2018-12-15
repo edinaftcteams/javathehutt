@@ -51,16 +51,17 @@ public class JTHAutoTest extends JTHOpMode {
             showMessageOnDriverStation("Gold found on the left - " + detector.getXPosition());
 
             showMessageOnDriverStation("Turn left");
-            encoderDrive(TURN_SPEED, 0, 6, 10);
+            encoderDrive(TURN_SPEED, -6, 6, 10);
 
+            //TODO: Need to tweak this
             showMessageOnDriverStation("Move forward");
             driveForward(8, 5);
 
-            showMessageOnDriverStation("Set arm to home");
-            setArmToHome();
-
             showMessageOnDriverStation("Move back");
             driveReverse(8, 5);
+
+            showMessageOnDriverStation("Set arm to home");
+            setArmToHome();
 
             showMessageOnDriverStation("Align robot to lander");
             encoderDrive(TURN_SPEED, 0, -6, 10);
@@ -69,16 +70,16 @@ public class JTHAutoTest extends JTHOpMode {
             showMessageOnDriverStation("Gold found on the right - " + detector.getXPosition());
 
             showMessageOnDriverStation("Turn right");
-            encoderDrive(TURN_SPEED, 6, 0, 10);
+            encoderDrive(TURN_SPEED, 6, -6, 10);
 
             showMessageOnDriverStation("Move forward");
             driveForward(8, 5);
 
-            showMessageOnDriverStation("Set arm to home");
-            setArmToHome();
-
             showMessageOnDriverStation("Move back");
             driveReverse(8, 5);
+
+            showMessageOnDriverStation("Set arm to home");
+            setArmToHome();
 
             showMessageOnDriverStation("Align robot to lander");
             encoderDrive(TURN_SPEED, -6, 0, 10);
@@ -89,11 +90,12 @@ public class JTHAutoTest extends JTHOpMode {
             showMessageOnDriverStation("Move forward");
             driveForward(3.5, 5);
 
+            showMessageOnDriverStation("Move back");
+            driveReverse(3.5, 5);
+
             showMessageOnDriverStation("Set arm to home");
             setArmToHome();
 
-            showMessageOnDriverStation("Move back");
-            driveReverse(3.5, 5);
         }
 
 
