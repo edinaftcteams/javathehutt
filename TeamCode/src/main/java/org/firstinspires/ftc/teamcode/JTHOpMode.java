@@ -729,7 +729,7 @@ public class JTHOpMode extends LinearOpMode {
         armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
 
         wristServo.setPosition(0);
-        elbowServo.setPosition(0.1894);
+        elbowServo.setPosition(0);
 
 
     }
