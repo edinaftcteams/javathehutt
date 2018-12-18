@@ -449,6 +449,10 @@ public class JTHOpMode extends LinearOpMode {
         armSlideMotor.setTargetPosition(590);
         armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
 
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(170);
+        armMotor.setPower(armSpeed);
+
     }
 
 

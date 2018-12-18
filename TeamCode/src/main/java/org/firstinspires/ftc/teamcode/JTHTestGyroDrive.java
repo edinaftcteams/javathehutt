@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 /*
  * Test code : To test drive and turn accuracy.
  */
-@TeleOp(name = "JTH Auto Test", group = "JTH")
+@TeleOp(name = "JTH Test Gyro", group = "JTH")
 public class JTHTestGyroDrive extends JTHOpMode {
 
     protected JTHAutoDepo depo;
