@@ -57,11 +57,11 @@ public class JTHAutoCrater extends JTHOpMode {
         sleep(200);
 
         showMessageOnDriverStation("C3  : Drive Forward 34");
-        driveForward(33, 5.0);
+        driveForward(31, 5.0);
         sleep(200);
 
-        showMessageOnDriverStation("C4  : Turn Left 45°");
-        turnLeft(45);
+        showMessageOnDriverStation("C4  : Turn Left 47°");
+        turnLeft(47);
         sleep(200);
 
         showMessageOnDriverStation("C5  : Drive Forward 27");
@@ -94,7 +94,7 @@ public class JTHAutoCrater extends JTHOpMode {
         sleep(200);
 
         showMessageOnDriverStation("C10: Drive Forward 14");
-        driveForward(24, 5.0);
+        driveForward(15, 5.0);
         sleep(200);
 
     }

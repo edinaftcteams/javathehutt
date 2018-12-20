@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 /*
  * Test code : To test drive and turn accuracy.
@@ -34,6 +35,7 @@ public class JTHAutoTest extends JTHOpMode {
         telemetry.update();
 
         waitForStart();
+/*
 
         showMessageOnDriverStation("Lower the robot");
         lowerTheRobot();
@@ -42,57 +44,178 @@ public class JTHAutoTest extends JTHOpMode {
         showMessageOnDriverStation("Unhook the robot");
         unHook();
         sleep(200);
-        lowerTheHook();
-        showMessageOnDriverStation("Reach out to move gold mineral");
-        //reachOutToMoveGoldMineral();
+*/
+
+
+
 
 
         if (detector.getXPosition() < 100) {//going left
             showMessageOnDriverStation("Gold found on the left - " + detector.getXPosition());
 
-            showMessageOnDriverStation("Turn left");
-            encoderDrive(TURN_SPEED, 6, -6, 10);
-
             showMessageOnDriverStation("Move forward");
-            driveForward(20, 5);
+            driveForward(3, 5);
 
-            showMessageOnDriverStation("Set arm to home");
-            setArmToHome();
+            showMessageOnDriverStation("Turn left");
+            encoderDrive(TURN_SPEED, 4, -3, 10);
 
-            showMessageOnDriverStation("Move back");
-           // driveReverse(8, 5);
+            showMessageOnDriverStation("Reach out to move gold mineral");
+            //reachOutToMoveGoldMineral();
 
-            showMessageOnDriverStation("Align robot to lander");
-            encoderDrive(TURN_SPEED, 0, -6, 10);
+            armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armSlideMotor.setTargetPosition(100);
+            armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+            sleep(400);
+
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(400);
+            armMotor.setPower(armSpeed);
+
+            sleep(400);
+
+            wristServo.setPosition(0.7585);
+            //elbowServo.setPosition(0.3766);
+
+
+            elbowServo.setPosition(0.15);
+
+            armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armSlideMotor.setTargetPosition(590);
+            armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+            sleep(400);
+
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(70);
+            armMotor.setPower(armSpeed);
+
+            sleep(400);
+
+            //showMessageOnDriverStation("Move forward");
+            driveForward(4.5, 5);
+
+            sleep(500);
+
+
+            elbowServo.setPosition(0.6);
+
+            //showMessageOnDriverStation("Move back");
+            //driveReverse(8, 5);
+
+            //showMessageOnDriverStation("Set arm to home");
+            //setArmToHome();
+
+            //showMessageOnDriverStation("Align robot to lander");
+            //encoderDrive(TURN_SPEED, 6, -6, 10);
 
         } else if (detector.getXPosition() > 400) {//going right
             showMessageOnDriverStation("Gold found on the right - " + detector.getXPosition());
 
-            showMessageOnDriverStation("Turn right");
-            encoderDrive(TURN_SPEED, -6, 6, 10);
-
             showMessageOnDriverStation("Move forward");
-            driveForward(20, 5);
+            driveForward(3, 5);
+
+            showMessageOnDriverStation("Turn right");
+            encoderDrive(TURN_SPEED, -3, 4.5, 10);
+
+            showMessageOnDriverStation("Reach out to move gold mineral");
+            //reachOutToMoveGoldMineral();
+
+            armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armSlideMotor.setTargetPosition(100);
+            armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+            sleep(400);
+
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(400);
+            armMotor.setPower(armSpeed);
+
+            sleep(400);
+
+            wristServo.setPosition(0.8585);
+            //elbowServo.setPosition(0.3766);
+
+
+            elbowServo.setPosition(0.6);
+
+            armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armSlideMotor.setTargetPosition(590);
+            armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+            sleep(400);
+
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(100);
+            armMotor.setPower(armSpeed);
+
+            sleep(400);
+
+            //showMessageOnDriverStation("Move forward");
+            driveForward(1.5, 5);
+
+            sleep(500);
+            elbowServo.setPosition(0.15);
+
+
+           /* showMessageOnDriverStation("Move back");
+            driveReverse(8, 5);
 
             showMessageOnDriverStation("Set arm to home");
             setArmToHome();
 
-            showMessageOnDriverStation("Move back");
-            //driveReverse(8, 5);
-
             showMessageOnDriverStation("Align robot to lander");
-            encoderDrive(TURN_SPEED, -6, 0, 10);
+            encoderDrive(TURN_SPEED, -6, 6, 10);*/
+
         } else {
             showMessageOnDriverStation("Gold found in the middle - " + detector.getXPosition());
 
+            showMessageOnDriverStation("Reach out to move gold mineral");
+            //reachOutToMoveGoldMineral();
+
+            armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armSlideMotor.setTargetPosition(100);
+            armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+            sleep(400);
+
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(400);
+            armMotor.setPower(armSpeed);
+
+            sleep(400);
+
+            wristServo.setPosition(0.8585);
+            //elbowServo.setPosition(0.3766);
+
+
+            elbowServo.setPosition(0.6);
+
+            armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armSlideMotor.setTargetPosition(590);
+            armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+            sleep(400);
+
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(100);
+            armMotor.setPower(armSpeed);
+
+            sleep(400);
+
             showMessageOnDriverStation("Move forward");
-            driveForward(20, 5);
+            driveForward(3.5, 5);
+
+            sleep(500);
+            elbowServo.setPosition(0.15);
+
+
+          /*  showMessageOnDriverStation("Move back");
+            driveReverse(3.5, 5);
 
             showMessageOnDriverStation("Set arm to home");
-            setArmToHome();
+            setArmToHome();*/
 
-            showMessageOnDriverStation("Move back");
-            driveReverse(3.5, 5);
         }
 
 
