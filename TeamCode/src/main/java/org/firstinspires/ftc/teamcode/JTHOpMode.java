@@ -1232,8 +1232,8 @@ public class JTHOpMode extends LinearOpMode {
 
         // calculate error in -179 to +180 range  (
         robotError = targetAngle - gyro.getIntegratedZValue();
-        while (robotError > 180) robotError -= 360;
-        while (robotError <= -180) robotError += 360;
+        while (robotError > 180) robotError -= 5;
+        while (robotError <= 180) robotError += 5;
         return robotError;
     }
 

@@ -45,9 +45,7 @@ public class JTHAutoTest extends JTHOpMode {
         unHook();
         sleep(200);
 */
-
-
-
+       // if(detector.)
 
 
         if (detector.getXPosition() < 100) {//going left
@@ -198,7 +196,7 @@ public class JTHAutoTest extends JTHOpMode {
             sleep(400);
 
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            armMotor.setTargetPosition(100);
+            armMotor.setTargetPosition(60);
             armMotor.setPower(armSpeed);
 
             sleep(400);
@@ -208,9 +206,31 @@ public class JTHAutoTest extends JTHOpMode {
 
             sleep(500);
             elbowServo.setPosition(0.15);
+            sleep(200);
+            initArm();
+            driveForward(30, 5);
+            dropMarker();
+            turnRight(45);
+            encoderDrive(DRIVE_SPEED, 4, 4, 5);
+            turnRight(90);
+            showMessageOnDriverStation("C9  :Extend Arm");
+            //reachIntoCrater();
+            controlArmManually = false;
+
+            wristServo.setPosition(1);
+            elbowServo.setPosition(0.437);
 
 
-          /*  showMessageOnDriverStation("Move back");
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setTargetPosition(200);
+            armMotor.setPower(armSpeed);
+            sleep(200);
+
+            armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armSlideMotor.setTargetPosition(100);
+            armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+            showMessageOnDriverStation("C8  :Drive Forward 30");
+            driveForward(45, 5.0);          /*  showMessageOnDriverStation("Move back");
             driveReverse(3.5, 5);
 
             showMessageOnDriverStation("Set arm to home");
