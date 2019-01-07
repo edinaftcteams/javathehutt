@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * Autonomous code : Docked on the lander side facing crater.
  */
 @Autonomous(name = "JTH Auto Crater", group = "JTH")
+@Disabled
 public class JTHAutoCrater extends JTHOpMode {
 
 

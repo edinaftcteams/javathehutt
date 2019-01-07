@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 /*
  * Autonomous code : Docked on the lander side facing depo.
  */
 @Autonomous(name = "JTH Auto Depo", group = "JTH")
+@Disabled
 public class JTHAutoDepo extends JTHOpMode {
 
 

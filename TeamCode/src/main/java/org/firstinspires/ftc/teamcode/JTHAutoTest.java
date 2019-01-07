@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -7,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * Test code : To test drive and turn accuracy.
  */
 @TeleOp(name = "JTH Auto Test", group = "JTH")
+@Disabled
 public class JTHAutoTest extends JTHOpMode {
 
     protected JTHAutoDepo depo;
@@ -45,8 +47,8 @@ public class JTHAutoTest extends JTHOpMode {
         unHook();
         sleep(200);
 */
-       // if(detector.)
-
+        // if(detector.)
+        sleep(2000);
 
         if (detector.getXPosition() < 100) {//going left
             showMessageOnDriverStation("Gold found on the left - " + detector.getXPosition());
@@ -98,14 +100,54 @@ public class JTHAutoTest extends JTHOpMode {
 
             elbowServo.setPosition(0.6);
 
-            //showMessageOnDriverStation("Move back");
-            //driveReverse(8, 5);
 
-            //showMessageOnDriverStation("Set arm to home");
-            //setArmToHome();
+            sleep(200);
+            initArm();
 
-            //showMessageOnDriverStation("Align robot to lander");
-            //encoderDrive(TURN_SPEED, 6, -6, 10);
+
+            //sampling complete
+
+            sleep(200);
+            showMessageOnDriverStation("Turn back to middle");
+            encoderDrive(TURN_SPEED, -4, 3, 10);
+
+
+            //Goto alliance crater
+            sleep(200);
+            //driveForward(5, 5);
+
+            encoderDrive(TURN_SPEED, -10, 10, 10);
+
+            sleep(200);
+            driveForward(20, 5);
+
+            sleep(200);
+            encoderDrive(TURN_SPEED, -8, 8, 10);
+
+            reachIntoCrater();
+
+            sleep(200);
+            driveForward(18, 5);
+
+
+           /* //Goto apponent crater
+
+
+            sleep(200);
+
+
+            encoderDrive(TURN_SPEED, 6, -6, 10);
+
+            sleep(200);
+            driveForward(24, 5);
+
+            sleep(200);
+            encoderDrive(TURN_SPEED, 7, -7, 10);
+
+            reachIntoCrater();
+
+            sleep(200);
+            driveForward(18, 5);*/
 
         } else if (detector.getXPosition() > 400) {//going right
             showMessageOnDriverStation("Gold found on the right - " + detector.getXPosition());
@@ -155,16 +197,53 @@ public class JTHAutoTest extends JTHOpMode {
             sleep(500);
             elbowServo.setPosition(0.15);
 
+            sleep(200);
+            initArm();
 
-           /* showMessageOnDriverStation("Move back");
-            driveReverse(8, 5);
+            //Sampling complete
 
-            showMessageOnDriverStation("Set arm to home");
-            setArmToHome();
 
-            showMessageOnDriverStation("Align robot to lander");
-            encoderDrive(TURN_SPEED, -6, 6, 10);*/
+            showMessageOnDriverStation("Turn back to middle");
+            encoderDrive(TURN_SPEED, 4, -4, 10);
 
+
+            //Goto alliance crater
+            sleep(200);
+            driveForward(5, 5);
+
+            encoderDrive(TURN_SPEED, -10, 10, 10);
+
+            sleep(200);
+            driveForward(20, 5);
+
+            sleep(200);
+            encoderDrive(TURN_SPEED, -8, 9, 10);
+
+            reachIntoCrater();
+
+            sleep(200);
+            driveForward(18, 5);
+
+
+           /* //Goto apponent crater
+
+
+            sleep(200);
+            driveForward(6, 5);
+
+            encoderDrive(TURN_SPEED, 8, -8, 10);
+
+            sleep(200);
+            driveForward(24, 5);
+
+            sleep(200);
+            encoderDrive(TURN_SPEED, 7, -7, 10);
+
+            reachIntoCrater();
+
+            sleep(200);
+            driveForward(18, 5);
+*/
         } else {
             showMessageOnDriverStation("Gold found in the middle - " + detector.getXPosition());
 
@@ -206,7 +285,59 @@ public class JTHAutoTest extends JTHOpMode {
 
             sleep(500);
             elbowServo.setPosition(0.15);
+//Sampling completed
+
+
+
+            /*//Goto alliance crater
+
             sleep(200);
+            initArm();
+
+            sleep(200);
+            driveForward(5, 5);
+
+            encoderDrive(TURN_SPEED, -10, 10, 10);
+
+            sleep(200);
+            driveForward(20, 5);
+
+            sleep(200);
+            encoderDrive(TURN_SPEED, -8, 9, 10);
+
+            reachIntoCrater();
+
+            sleep(200);
+            driveForward(18, 5);*/
+
+
+            //Goto apponent crater
+
+
+            sleep(200);
+            initArm();
+
+            sleep(200);
+            driveForward(6, 5);
+
+
+            sleep(2000);
+
+            encoderDrive(TURN_SPEED, 8, -8, 10);
+
+            sleep(200);
+            driveForward(24, 5);
+
+            sleep(200);
+            encoderDrive(TURN_SPEED, 7, -7, 10);
+
+            reachIntoCrater();
+
+            sleep(200);
+            driveForward(18, 5);
+
+
+            /*sleep(200);
             initArm();
             driveForward(30, 5);
             dropMarker();
@@ -230,7 +361,7 @@ public class JTHAutoTest extends JTHOpMode {
             armSlideMotor.setTargetPosition(100);
             armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
             showMessageOnDriverStation("C8  :Drive Forward 30");
-            driveForward(45, 5.0);          /*  showMessageOnDriverStation("Move back");
+            driveForward(45, 5.0);          *//*  showMessageOnDriverStation("Move back");
             driveReverse(3.5, 5);
 
             showMessageOnDriverStation("Set arm to home");

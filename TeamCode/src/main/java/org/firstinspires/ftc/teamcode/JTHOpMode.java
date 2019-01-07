@@ -978,12 +978,12 @@ public class JTHOpMode extends LinearOpMode {
                     (runtime.seconds() < timeoutS) &&
                     (leftMotor.isBusy() && rightMotor.isBusy())) {
 
-                // Display it for the driver.
+               /* // Display it for the driver.
                 telemetry.addData("Path1", "Running to %7d :%7d", newLeftTarget, newRightTarget);
                 telemetry.addData("Path2", "Running at %7d :%7d",
                         leftMotor.getCurrentPosition(),
                         rightMotor.getCurrentPosition());
-                telemetry.update();
+                telemetry.update();*/
             }
 
             // Stop all motion;
@@ -1003,7 +1003,7 @@ public class JTHOpMode extends LinearOpMode {
 
         telemetry.addLine(msg);
         telemetry.update();
-        sleep(2000);
+        sleep(200);
 
     }
 
