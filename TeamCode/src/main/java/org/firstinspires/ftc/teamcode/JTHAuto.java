@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @TeleOp(name = "JTH Auto", group = "JTH")
 public class JTHAuto extends JTHOpMode {
 
+    private boolean phoneInLandscape = true;
+
     @Override
     public void runOpMode() {
 
@@ -21,6 +23,8 @@ public class JTHAuto extends JTHOpMode {
 
         boolean dpad_down = false;
         boolean dpad_up = false;
+        boolean dpad_left = false;
+        boolean dpad_right = false;
 
         String position = "";
         String lastPosition = "";
@@ -41,7 +45,7 @@ public class JTHAuto extends JTHOpMode {
 
         telemetry.update();
 
-        while (!opModeIsActive()) {
+        while ((!opModeIsActive()) & (!isStopRequested())) {
             if (gamepad1.x) {
                 dockLocation = "Crater";
                 parkLocation = "Alliance";
@@ -70,15 +74,46 @@ public class JTHAuto extends JTHOpMode {
             }
 
 
-            if ((gamepad2.dpad_down == true) && (dpad_down == false)) {
+            if ((gamepad2.dpad_left == true) && (dpad_left == false)) {
+
                 if (sleepTimer > 0) {
                     sleepTimer = sleepTimer - 1000;
                 }
-            } else if ((gamepad2.dpad_up == true) && (dpad_up == false)) {
+            } else if ((gamepad2.dpad_right == true) && (dpad_right == false)) {
+
+
                 sleepTimer = sleepTimer + 1000;
             }
+
+
+            if ((gamepad2.dpad_down == true) && (dpad_down == false)) {
+
+                dropMarker();
+
+            } else if ((gamepad2.dpad_up == true) && (dpad_up == false)) {
+
+                //reachIntoCrater();
+                controlArmManually = false;
+
+                wristServo.setPosition(0.6);
+                elbowServo.setPosition(0.3);
+
+
+                armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armMotor.setTargetPosition(500);
+                armMotor.setPower(armSpeed);
+
+
+                armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armSlideMotor.setTargetPosition(590);
+                armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+            }
+
             dpad_down = gamepad2.dpad_down;
             dpad_up = gamepad2.dpad_up;
+            dpad_left = gamepad2.dpad_left;
+            dpad_right = gamepad2.dpad_right;
 
 
             String pathName = "";
@@ -108,20 +143,14 @@ public class JTHAuto extends JTHOpMode {
                 }
             }
 
+
             telemetry.addLine("Score                  : " + score + "               Path Name  : " + pathName);
             telemetry.addLine("************************************************************");
             telemetry.addLine("Dock Location   : " + dockLocation);
 
-            if (detector.getXPosition() < 100) {//going left
-                position = "LEFT";
+            position = getGoldPosition();
 
-            } else if (detector.getXPosition() > 400) {//going right
-                position = "RIGHT";
-            } else {
-                position = "MIDDLE";
-            }
-
-            telemetry.addLine("Sampling ?        : " + sample + "            Position       : " + position + " (" + detector.getXPosition() + ")");
+            telemetry.addLine("Sampling ?        : " + sample + "            " + position + " (" + detector.getXPosition() + "," + detector.getYPosition() + ")");
             telemetry.addLine("Sleep                  : " + sleepTimer);
             telemetry.addLine("Claiming ?         : " + claim);
             telemetry.addLine("Parking ?           : " + park);
@@ -144,7 +173,8 @@ public class JTHAuto extends JTHOpMode {
 
 
         if (sample == true) {
-            for (
+            position = getGoldPosition();
+          /*  for (
                     int x = 0;
                     x < 3; x++)
 
@@ -170,7 +200,7 @@ public class JTHAuto extends JTHOpMode {
                 lastPosition = position;
 
                 showMessageOnDriverStation(numberOfSampleCheck + ". " + position + " - " + detector.getXPosition());
-            }
+            }*/
         }
 
         showMessageOnDriverStation("Lower the robot");
@@ -512,28 +542,88 @@ public class JTHAuto extends JTHOpMode {
     public void dropMarker() {
         //not tested
 
+        wristServo.setPosition(0.65);
+
+
         showMessageOnDriverStation("Move arm down to start whipping  action");
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(60);
+        armMotor.setTargetPosition(320);
         armMotor.setPower(armSpeed);
 
 
         showMessageOnDriverStation("Move arm up");
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(400);
+        armMotor.setTargetPosition(450);
+        armMotor.setPower(armSpeed);
+
+        showMessageOnDriverStation("Move arm down to start whipping  action");
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(320);
         armMotor.setPower(armSpeed);
 
 
-        showMessageOnDriverStation("Move arm down again");
+        showMessageOnDriverStation("Move arm up");
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(60);
+        armMotor.setTargetPosition(450);
+        armMotor.setPower(armSpeed);
+
+        showMessageOnDriverStation("Move arm down to start whipping  action");
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(320);
+        armMotor.setPower(armSpeed);
+
+
+        showMessageOnDriverStation("Move arm up");
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(450);
+        armMotor.setPower(armSpeed);
+
+
+       /* showMessageOnDriverStation("Move arm down again");
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(450);
         armMotor.setPower(armSpeed);
 
 
         showMessageOnDriverStation("Move arm up again");
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(400);
+        armMotor.setTargetPosition(750);
         armMotor.setPower(armSpeed);
+
+
+       showMessageOnDriverStation("Move arm down again");
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(450);
+        armMotor.setPower(armSpeed);
+
+
+        showMessageOnDriverStation("Move arm up again");
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(750);
+        armMotor.setPower(armSpeed);*/
+    }
+
+
+    private String getGoldPosition() {
+        if (phoneInLandscape == true) {
+            if (detector.getYPosition() <= 150) {//going left
+                return "LEFT";
+            } else if ((detector.getYPosition() > 150) & (detector.getYPosition() < 330)) {//going right
+                return "MIDDLE";
+            } else {
+                return "RIGHT";
+            }
+        } else {
+            if (detector.getXPosition() < 100) {//going left
+                return "LEFT";
+
+            } else if (detector.getXPosition() > 400) {//going right
+                return "RIGHT";
+            } else {
+                return "MIDDLE";
+            }
+        }
+
     }
 }
 
