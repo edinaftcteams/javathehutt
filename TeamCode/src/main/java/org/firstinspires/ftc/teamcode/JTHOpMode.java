@@ -984,7 +984,7 @@ public class JTHOpMode extends LinearOpMode {
 
         telemetry.addLine(msg);
         telemetry.update();
-        sleep(200);
+        sleep(400);
 
     }
 

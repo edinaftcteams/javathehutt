@@ -443,7 +443,7 @@ public class JTHAuto extends JTHOpMode {
         initArm();
 
         showMessageOnDriverStation("Turn around");
-        encoderDrive(TURN_SPEED, 12, -12, 1.1);
+        encoderDrive(TURN_SPEED, 90, -90, 1.1);
 
         showMessageOnDriverStation("Move forward");
         driveForward(10, 1.1);
@@ -517,21 +517,21 @@ public class JTHAuto extends JTHOpMode {
     public void claimFromCrater() {
 
         //not tested
-
+        //We are risking hitting the lander when going to the claim
         showMessageOnDriverStation("Turn left");
         encoderDrive(TURN_SPEED, 8, -8, 1.1);
 
         showMessageOnDriverStation("Move forward");
-        driveForward(24, 1.1);
+        driveForward(25, 1.1);
 
         showMessageOnDriverStation("Turn left");
-        encoderDrive(TURN_SPEED, 7, -7, 1.1);
+        encoderDrive(TURN_SPEED, 6, -6, 1.1);
 
         showMessageOnDriverStation("Reach out to crater");
         reachIntoCrater();
 
         showMessageOnDriverStation("Move forward");
-        driveForward(18, 1.1);
+        driveForward(19, 1.1);
 
 
         showMessageOnDriverStation("Drop Marker");
@@ -607,11 +607,11 @@ public class JTHAuto extends JTHOpMode {
     private String getGoldPosition() {
         if (phoneInLandscape == true) {
             if (detector.getYPosition() <= 150) {//going left
-                return "LEFT";
+                return "RIGHT";
             } else if ((detector.getYPosition() > 150) & (detector.getYPosition() < 330)) {//going right
                 return "MIDDLE";
             } else {
-                return "RIGHT";
+                return "LEFT";
             }
         } else {
             if (detector.getXPosition() < 100) {//going left
