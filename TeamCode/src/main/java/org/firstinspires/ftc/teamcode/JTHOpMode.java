@@ -50,9 +50,9 @@ public class JTHOpMode extends LinearOpMode {
 
     protected static final double DRIVE_SPEED_PRECISE = 0.6;
     protected static final double TURN_SPEED_PRECISE = 0.4;
-    protected static final double ARM_SPEED = 0.8;
-    protected static final double ARM_SLIDE_SPEED = 0.8;
-    protected static final double ARM_SLIDE_HOME_SPEED = 0.5;
+    protected static final double ARM_SPEED = 1; //0.8
+    protected static final double ARM_SLIDE_SPEED = 1; //0.8
+    protected static final double ARM_SLIDE_HOME_SPEED = 1; //0.5
 
     static final double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     static final double P_TURN_COEFF = 0.1;     // Larger is more responsive, but also less stable
@@ -402,12 +402,12 @@ public class JTHOpMode extends LinearOpMode {
     public void reachIntoCrater() {
         controlArmManually = false;
 
-        wristServo.setPosition(1);
+        //wristServo.setPosition(1);
         elbowServo.setPosition(0.437);
 
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(200);
+        armMotor.setTargetPosition(450);
         armMotor.setPower(armSpeed);
 
 
@@ -415,6 +415,22 @@ public class JTHOpMode extends LinearOpMode {
         armSlideMotor.setTargetPosition(590);
         armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
     }
+
+
+    public void reachIntoCraterWithoutSlide() {
+        controlArmManually = false;
+
+        //wristServo.setPosition(1);
+        elbowServo.setPosition(0.437);
+
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(400);
+        armMotor.setPower(armSpeed);
+
+
+    }
+
 
     public void reachOutToMoveGoldMineral() {
         controlArmManually = false;
@@ -666,8 +682,11 @@ public class JTHOpMode extends LinearOpMode {
         sleep(500);
         idle();
 
-        wristServo.setPosition(WRIST_HOME);
-        elbowServo.setPosition(ELBOW_HOME);
+        // wristServo.setPosition(WRIST_HOME);
+        //elbowServo.setPosition(ELBOW_HOME);
+
+        wristServo.setPosition(0);
+        elbowServo.setPosition(0);
 
         sleep(500);
         idle();
@@ -688,7 +707,25 @@ public class JTHOpMode extends LinearOpMode {
         elbowServo.setPosition(0);
     }
 
+
     public void setArmToHome() {
+        controlArmManually = false;
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(900);
+        armMotor.setPower(armSpeed);
+
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armSlideMotor.setTargetPosition(300);
+        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+
+        sleep(2000);
+
+
+    }
+
+    public void setArmToHomeDown() {
         controlArmManually = false;
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -698,14 +735,14 @@ public class JTHOpMode extends LinearOpMode {
         sleep(500);
         idle();
 
-        wristServo.setPosition(WRIST_HOME);
-        elbowServo.setPosition(ELBOW_HOME);
+        wristServo.setPosition(0);
+        elbowServo.setPosition(0);
 
         sleep(500);
         idle();
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(10);
+        armMotor.setTargetPosition(15);
         armMotor.setPower(armSpeed);
 
 
@@ -715,6 +752,8 @@ public class JTHOpMode extends LinearOpMode {
 
         wristServo.setPosition(0);
         elbowServo.setPosition(0);
+
+        sleep(500);
 
 
     }
@@ -984,7 +1023,7 @@ public class JTHOpMode extends LinearOpMode {
 
         telemetry.addLine(msg);
         telemetry.update();
-        sleep(400);
+        sleep(200);
 
     }
 
