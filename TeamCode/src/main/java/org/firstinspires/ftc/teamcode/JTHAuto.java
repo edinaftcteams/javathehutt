@@ -287,7 +287,7 @@ public class JTHAuto extends JTHOpMode {
         //sleep(400);
         showMessageOnDriverStation("Move arm down to mineral level");
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(135);
+        armMotor.setTargetPosition(70); //135
         armMotor.setPower(armSpeed);
 
         //sleep(400);
@@ -309,6 +309,9 @@ public class JTHAuto extends JTHOpMode {
 
         wristServo.setPosition(0.5);
         setArmToHome();
+
+
+        sleep(500);
 
         showMessageOnDriverStation("Move back");
         driveForward(-7, 1.1);
@@ -353,13 +356,13 @@ public class JTHAuto extends JTHOpMode {
         elbowServo.setPosition(0.6);
 
         armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armSlideMotor.setTargetPosition(560);
+        armSlideMotor.setTargetPosition(530);
         armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
 
         sleep(400);
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(135);
+        armMotor.setTargetPosition(50); //135
         armMotor.setPower(armSpeed);
 
         sleep(400);
@@ -377,6 +380,8 @@ public class JTHAuto extends JTHOpMode {
 
         setArmToHome();
         //Sampling complete
+
+        sleep(500);
 
         sleep(200);
         driveForward(-1, 1.1);
@@ -418,13 +423,13 @@ public class JTHAuto extends JTHOpMode {
         elbowServo.setPosition(0.6);
 
         armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armSlideMotor.setTargetPosition(570);
+        armSlideMotor.setTargetPosition(540);
         armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
 
         sleep(400);
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(140);
+        armMotor.setTargetPosition(50); //140
         armMotor.setPower(armSpeed);
 
         sleep(400);
@@ -442,7 +447,7 @@ public class JTHAuto extends JTHOpMode {
         //initArm();
         setArmToHome();
 
-
+        sleep(500);
 
         sleep(200);
         driveForward(6, 1.1);
@@ -532,7 +537,7 @@ public class JTHAuto extends JTHOpMode {
         //not tested
         //We are risking hitting the lander when going to the claim
         showMessageOnDriverStation("Turn left");
-        encoderDrive(TURN_SPEED, 9, -9, 1.1);
+        encoderDrive(TURN_SPEED, 10, -10, 1.1);
 
         showMessageOnDriverStation("Move forward");
         driveForward(32, 20);

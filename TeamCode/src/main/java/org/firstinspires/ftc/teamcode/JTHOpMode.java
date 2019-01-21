@@ -275,7 +275,8 @@ public class JTHOpMode extends LinearOpMode {
 
 
                 if (gamepad2.start == true) {
-                    setArmToHome();
+                    //setArmToHome();
+                    setArmToHomeDown();
                 }
 
 
@@ -345,7 +346,8 @@ public class JTHOpMode extends LinearOpMode {
                 } else if (gamepad1.x == true) {
                     encoderDrive(TURN_SPEED_PRECISE, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
                 } else if (gamepad1.b == true) {
-                    encoderDrive(TURN_SPEED_PRECISE, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
+                    reachUptoLanderArmUp();
+                    //encoderDrive(TURN_SPEED_PRECISE, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
                 } else if (gamepad1.y == true) {
                     encoderDrive(DRIVE_SPEED_PRECISE, -4, -4, 2.0);  // Forward 4 Inches with 2 Sec timeout
                 } else if (gamepad1.a == true) {
@@ -407,7 +409,7 @@ public class JTHOpMode extends LinearOpMode {
 
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(450);
+        armMotor.setTargetPosition(550);
         armMotor.setPower(armSpeed);
 
 
@@ -488,6 +490,27 @@ public class JTHOpMode extends LinearOpMode {
         armMotor.setTargetPosition(100);
         armMotor.setPower(armSpeed);
 
+    }
+
+
+    public void reachUptoLanderArmUp() {
+        controlArmManually = false;
+
+        wristServo.setPosition(0);
+        elbowServo.setPosition(0.437);
+
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(1700);
+        armMotor.setPower(armSpeed);
+
+
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armSlideMotor.setTargetPosition(10);
+        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+
+        elbowServo.setPosition(0);
     }
 
     public void reachUptoLander() {
@@ -851,7 +874,7 @@ public class JTHOpMode extends LinearOpMode {
     }
 
     public boolean hook() {
-        hookServo.setPosition(0.5);
+        hookServo.setPosition(0.7);
         isHooked = true;
         return true;
     }
