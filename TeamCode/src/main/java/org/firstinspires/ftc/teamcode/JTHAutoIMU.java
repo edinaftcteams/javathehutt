@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * Auto : Configurable autonomous paths.
  */
 @Autonomous(name = "JTH Auto", group = "JTH")
-public class JTHAuto extends JTHOpMode {
+public class JTHAutoIMU extends JTHOpModeIMU {
 
     private boolean phoneInLandscape = true;
 
@@ -590,8 +590,6 @@ public class JTHAuto extends JTHOpMode {
         // showMessageOnDriverStation("Tuck the arm");
         //initArm();
         //setArmToHome();
-
-
 
 
     }
