@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 /*
  * Auto : Configurable autonomous paths.
  */
-@Autonomous(name = "JTH Auto", group = "JTH")
+@Autonomous(name = "JTH Auto IMU", group = "JTH")
 public class JTHAutoIMU extends JTHOpModeIMU {
 
     private boolean phoneInLandscape = true;
