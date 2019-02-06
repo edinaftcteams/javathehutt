@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.disnodeteam.dogecv.CameraViewDisplay;
 import com.disnodeteam.dogecv.DogeCV;
 import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -14,19 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-
-import java.util.Locale;
-
 /*
- * Sample code for JavaTheHUTT - 11/19/2018
+ * Sample code for JavaTheHUTT - Raj Kammela 11/19/2018
  * 1. Two drive modes. Start button toggles between the modes. Default is Tank mode. You can see if robot is in Tank mode or not in driver station telemetry log
  *    a. Tank mode : control left motor with left stick, right motor with right stick
  *    b. POV mode  : Left stick controls forward/back word movement, like accelerator in the car. Right stick controls turns, like steering wheel.
@@ -46,9 +33,9 @@ import java.util.Locale;
  * 12. GamePad 2, b,x positions the arm for ball pickup and drop off
  * 13. GamePad 2, left joystick controls drive and turns
  */
-@TeleOp(name = "JTH OpMode IMU", group = "JTH")
+@TeleOp(name = "JTH OpMode Backup", group = "JTH")
 @Disabled
-public class JTHOpModeIMU extends LinearOpMode {
+public class JTHOpMode_backup extends LinearOpMode {
 
 
     protected ElapsedTime runtime = new ElapsedTime();
@@ -59,8 +46,6 @@ public class JTHOpModeIMU extends LinearOpMode {
     protected static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     protected static final double DRIVE_SPEED = 0.8;
-    protected static final double DRIVE_SPEED_REVERSE = 0.3;
-
     protected static final double TURN_SPEED = 0.5;
     protected static final double INCH_ANGLE_RATIO = 11 / 90;
     protected static final double LIFT_POWER = 1;
@@ -132,25 +117,9 @@ public class JTHOpModeIMU extends LinearOpMode {
     protected int leftTurnAngle = 0;
     protected int rightTurnAngle = 0;
 
+    protected boolean progressiveAcceleration = false;
 
     public GoldAlignDetector detector;
-
-    //----------------------------------------------------------------------------------------------
-    // State
-    //----------------------------------------------------------------------------------------------
-
-    // The IMU sensor object
-    BNO055IMU imu;
-
-    // State used for updating telemetry
-    Orientation angles;
-    Acceleration gravity;
-
-    double currentTilt;
-    boolean tilted;
-
-    Orientation lastAngles = new Orientation();
-    double globalAngle, power = .30, correction;
 
 
     protected void initRobot() {
@@ -184,9 +153,7 @@ public class JTHOpModeIMU extends LinearOpMode {
         armSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        //rightMotor.setDirection(DcMotor.Direction.REVERSE);
-        leftMotor.setDirection(DcMotor.Direction.REVERSE);
-
+        rightMotor.setDirection(DcMotor.Direction.REVERSE);
 
         hookServo = hardwareMap.get(Servo.class, "hook_servo");
         markerServo = hardwareMap.get(Servo.class, "marker_servo");
@@ -195,31 +162,6 @@ public class JTHOpModeIMU extends LinearOpMode {
 
         //setArmToHome();
 
-        // Set up the parameters with which we will use our IMU. Note that integration
-        // algorithm here just reports accelerations to the logcat log; it doesn't actually
-        // provide positional information.
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled = true;
-        parameters.loggingTag = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
-        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
-
-        telemetry.addData("Mode", "calibrating...");
-        telemetry.update();
-
-        // make sure the imu gyro is calibrated before continuing.
-        while (!isStopRequested() && !imu.isGyroCalibrated()) {
-            sleep(50);
-            idle();
-        }
 
     }
 
@@ -247,12 +189,6 @@ public class JTHOpModeIMU extends LinearOpMode {
         telemetry.addLine("Press Start....");
         telemetry.update();
 
-
-        Thread antiTiltThread = new AntiTiltThread();
-
-        // Set up our telemetry dashboard
-        composeTelemetry();
-
         waitForStart();
 
         boolean y = false;
@@ -261,405 +197,211 @@ public class JTHOpModeIMU extends LinearOpMode {
         boolean dpad_left = false;
         boolean dpad_right = false;
 
-
-        // Start the logging of measured acceleration
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
-
-        antiTiltThread.start();
-
-        //driveForward(100);
-
         // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
         while (opModeIsActive()) {
-            telemetry.update();
 
-            // correction = checkDirection();
-
-
-            if (gamepad2.start == true) {
-                //setArmToHome();
-                setArmToHomeDown();
-            }
-
-
-            if (gamepad2.dpad_down == true) {
-                wristServo.setPosition(Range.clip(wristServo.getPosition() - 0.01, 0, 1));
-            }
-
-            if (gamepad2.dpad_up == true) {
-                wristServo.setPosition(Range.clip(wristServo.getPosition() + 0.01, 0, 1));
-            }
-
-
-            if (gamepad2.x == true) {
-                reachUptoLander();
-            }
-
-            if (gamepad2.b == true) {
-                reachIntoCrater();
-                armMotor.setTargetPosition(300);
-                armMotor.setPower(armSpeed);
-            }
-
-
-            if (gamepad2.y == true) {
-                moveArmHigherThanCrater();
-            }
-
-            if (gamepad2.a == true) {
-                moveArmDown();
-            }
-
-
-            if (gamepad2.right_bumper == true) {
-                wristServo.setPosition(0.5);
-            }
-
-            if (gamepad2.left_bumper == true) {
-                wristServo.setPosition(1);
-            }
-
-            if (gamepad2.dpad_right == true) {
-                elbowServo.setPosition(Range.clip(elbowServo.getPosition() - 0.01, 0, 1));
-            }
-
-            if (gamepad2.dpad_left == true) {
-                elbowServo.setPosition(Range.clip(elbowServo.getPosition() + 0.01, 0, 1));
-            }
-
-
-            if (gamepad1.x == true) {
-                encoderDrive(TURN_SPEED_PRECISE, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
-
-                driveForward(100, 10);
-
-            }
-
-            if (gamepad1.b == true) {
-                reachUptoLanderArmUp();
-                //encoderDrive(TURN_SPEED_PRECISE, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
-            }
-            if (gamepad1.y == true) {
-                encoderDrive(DRIVE_SPEED_PRECISE, -4, -4, 2.0);  // Forward 4 Inches with 2 Sec timeout
-            }
-            if (gamepad1.a == true) {
-                encoderDrive(DRIVE_SPEED_PRECISE, 4, 4, 2.0);  // Backward 4 Inches with 2 Sec timeout
-            }
-            if (gamepad1.left_bumper == true) {
-                //encoderDrive(turnSpeed, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
-                turn(80, 0.4);
-            }
-            if (gamepad1.right_bumper == true) {
-                //encoderDrive(turnSpeed, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
-                turn(-80, 0.4);
-            }
-            if (gamepad1.dpad_down == true) {
-                lowerTheHook();
-            }
-            if (gamepad1.dpad_up == true) {
-                liftTheHook();
-            }
-            if (gamepad1.dpad_right == true) {
-                hook();
-            }
-            if (gamepad1.dpad_left == true) {
-                unHook();
-            }
-
-            if (gamepad1.right_trigger != 0) {
-
-            }
-
-            if (gamepad1.right_trigger != 0) {
-
-            }
-
-            driveUsingPOVMode();
-
-            if ((gamepad2.right_stick_y != 0) || (gamepad2.right_stick_x != 0)) {
-                setArmToManualControl();
-            }
-
-            if (controlArmManually == true) {
-                if ((armMotor.getCurrentPosition() > 1700) && (gamepad2.right_stick_y < 0)) {
-
-                } else {
-                    armMotor.setPower(-gamepad2.right_stick_y * armSpeed);
-                }
-                armSlideMotor.setPower(gamepad2.right_stick_x * armSlideSpeed);
-            }
-
-
-        }
-
-        antiTiltThread.interrupt();
-
-    }
-
-
-    public void encoderDrive(double speed,
-                             double leftInches, double rightInches,
-                             double timeoutS) {
-        int newLeftTarget;
-        int newRightTarget;
-
-        // Ensure that the opmode is still active
-        if (opModeIsActive()) {
-
-            // Determine new target position, and pass to motor controller
-            newLeftTarget = leftMotor.getCurrentPosition() + (int) (leftInches * COUNTS_PER_INCH);
-            newRightTarget = rightMotor.getCurrentPosition() + (int) (rightInches * COUNTS_PER_INCH);
-            leftMotor.setTargetPosition(newLeftTarget);
-            rightMotor.setTargetPosition(newRightTarget);
-
-            // Turn On RUN_TO_POSITION
-            leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            // reset the timeout time and start motion.
-            runtime.reset();
-            leftMotor.setPower(Math.abs(speed * 0.01));
-            rightMotor.setPower(Math.abs(speed * 0.01));
-
-            // keep looping while we are still active, and there is time left, and both motors are running.
-            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
-            // its target position, the motion will stop.  This is "safer" in the event that the robot will
-            // always end the motion as soon as possible.
-            // However, if you require that BOTH motors have finished their moves before the robot continues
-            // onto the next step, use (isBusy() || isBusy()) in the loop test.
-
-            int progressiveDrive = 1;
-            while (opModeIsActive() &&
-                    (runtime.seconds() < timeoutS) &&
-                    (leftMotor.isBusy() && rightMotor.isBusy())) {
-
-                progressiveDrive++;
-                progressiveDrive = Range.clip(progressiveDrive, 1, 100);
-
-                leftMotor.setPower(Math.abs(speed * 0.01 * progressiveDrive));
-                rightMotor.setPower(Math.abs(speed * 0.01 * progressiveDrive));
-
-                if (tilted) {
-                    return;
-                }
-               /* // Display it for the driver.
-                telemetry.addData("Path1", "Running to %7d :%7d", newLeftTarget, newRightTarget);
-                telemetry.addData("Path2", "Running at %7d :%7d",
-                        leftMotor.getCurrentPosition(),
-                        rightMotor.getCurrentPosition());
-                telemetry.update();*/
-            }
-
-            // Stop all motion;
-            leftMotor.setPower(0);
-            rightMotor.setPower(0);
-
-            // Turn off RUN_TO_POSITION
-            leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-            //  sleep(250);   // optional pause after each move
-        }
-    }
-
-
-    public void driveForward(double inches, double timeoutS) {
-        encoderDrive(DRIVE_SPEED, -inches, -inches, timeoutS);
-    }
-
-    public void driveReverse(double inches, double timeoutS) {
-        encoderDrive(DRIVE_SPEED_REVERSE, inches, inches, timeoutS);
-    }
-
-    public void driveForwardIMU(double t) {
-
-        double p = 0.5;
-        for (int x = 1; x <= t; x++) {
-            correction = checkDirection();
-
-
-            correction = Range.clip(correction, -0.05, 0.05);
-
-            showMessageOnDriverStation(correction + " Correction");
-
-
-            leftMotor.setPower(-p);
-            rightMotor.setPower(-p + correction);
-
-            sleep(100);
-            idle();
-            if (tilted) {
-                return;
-            }
-        }
-
-
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
-
-
-    }
-
-
-    public void driveForwardInInches(double inches) {
-
-        double p = 0.5;
-
-
-        double targetCounts = Math.abs(leftMotor.getCurrentPosition()) + (inches * COUNTS_PER_INCH);
-
-        while (opModeIsActive() & (Math.abs(leftMotor.getCurrentPosition()) < targetCounts)) {
-            correction = checkDirection();
-            leftMotor.setPower(-p);
-            rightMotor.setPower(-p + correction);
-            // showMessageOnDriverStation(leftMotor.getCurrentPosition() + " Left motor " + targetCounts);
-            if (tilted) {
-                return;
-            }
-        }
-
-
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
-
-
-    }
-
-
-    public void driveReverseIMU(double t) {
-
-        double p = 0.5;
-        for (int x = 1; x <= t; x++) {
-            correction = checkDirection();
-            leftMotor.setPower(p);
-            rightMotor.setPower(p + correction);
-            sleep(100);
-            idle();
-        }
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
-    }
-
-    //----------------------------------------------------------------------------------------------
-    // Anti Tilt Thread
-    //----------------------------------------------------------------------------------------------
-    private class AntiTiltThread extends Thread {
-        public AntiTiltThread() {
-            this.setName("Anti Tilt Thread");
-        }
-
-        // called when tread.start is called. thread stays in loop to do what it does until exit is
-        // signaled by main code calling thread.interrupt.
-        @Override
-        public void run() {
-            double lastTilt = 0;
-            while (!isInterrupted()) {
-                // we record the Y values in the main class to make showing them in telemetry
-                // easier.
-                currentTilt = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle;
-
-                if ((lastTilt <= -7) & (currentTilt > -7)) {
-                    tilted = false;
-                    leftMotor.setPower(0);
-                    rightMotor.setPower(0);
-                }
-                if (currentTilt <= -7) {
-                    //driveReverse(6, 5);
-                    //  stopDriving();
-                    tilted = true;
-                    leftMotor.setPower(0.5);
-                    rightMotor.setPower(0.5);
+            telemetry.addLine();
+            telemetry.addData("Pad A: Button", gamepad1.toString());
+            telemetry.addData("Pad B: Button", gamepad2.toString());
+
+
+            if (configMode == true) {
+                telemetry.addData("You are in config mode!!", "Can't drive");
+                telemetry.addData("Editing > " + getEditVariableName(), editVariable(false, false));
+
+                telemetry.addData("testDriveDistance", testDriveDistance);
+                telemetry.addData("leftTurnAngle", leftTurnAngle);
+                telemetry.addData("rightTurnAngle", rightTurnAngle);
+
+                telemetry.addData("driveSpeed", driveSpeed);
+                telemetry.addData("turnSpeed", turnSpeed);
+                telemetry.addData("liftPower", liftPower);
+                telemetry.addData("armSpeed", armSpeed);
+                telemetry.addData("armSlideSpeed", armSlideSpeed);
+                telemetry.addData("InchAngleRatio", inchAngleRatio);
+                telemetry.addData("sleepBetweenSteps", sleepBetweenSteps);
+
+                telemetry.update();
+
+
+                if ((gamepad2.y == true) && (y == false)) {
+                    configMode = !configMode;
+                } else if ((gamepad2.dpad_down == true) && (dpad_down == false)) {
+                    editVariable(true, false);
+                } else if ((gamepad2.dpad_up == true) && (dpad_up == false)) {
+                    editVariable(true, true);
+                } else if ((gamepad2.dpad_right == true) && (dpad_right == false)) {
+                    if (editVariableIndex == 9) {
+                        editVariableIndex = 0;
+                    } else {
+                        editVariableIndex = editVariableIndex + 1;
+                    }
+                } else if ((gamepad2.dpad_left == true) && (dpad_left == false)) {
+                    if (editVariableIndex == 0) {
+                        editVariableIndex = 9;
+                    } else {
+                        editVariableIndex = editVariableIndex - 1;
+                    }
                 }
 
-                lastTilt = currentTilt;
+                y = gamepad2.y;
+                dpad_down = gamepad2.dpad_down;
+                dpad_up = gamepad2.dpad_up;
+                dpad_right = gamepad2.dpad_right;
+                dpad_left = gamepad2.dpad_left;
 
-                idle();
+
+            } else {
+
+                /*double myAngle = -1 * 90 * inchAngleRatio;
+
+                telemetry.addData("inchAngleRatio", inchAngleRatio);
+                telemetry.addData("INCH_ANGLE_RATIO", INCH_ANGLE_RATIO);
+                telemetry.addData("Check angle", -1 * 90 * inchAngleRatio);
+                telemetry.addData("Check angle", myAngle);*/
+
+                telemetry.addData("You are in drive mode!!", "Have fun");
+                telemetry.addData("Gold position", detector.getXPosition());
+                telemetry.addData("armStartLimit", armStartLimit.getState());
+                telemetry.addData("armSlideStartLimit", armSlideStartLimit.getState());
+
+                telemetry.addData("controlArmManually", controlArmManually);
+
+                telemetry.addData("Arm Slide Position", armSlideMotor.getCurrentPosition());
+                telemetry.addData("Arm Position", armMotor.getCurrentPosition());
+                telemetry.addData("Elbow Position", elbowServo.getPosition());
+                telemetry.addData("Wrist Position", wristServo.getPosition());
+
+
+                telemetry.update();
+
+
+                if (gamepad2.start == true) {
+                    //setArmToHome();
+                    setArmToHomeDown();
+                }
+
+
+                if (gamepad2.dpad_down == true) {
+                    wristServo.setPosition(Range.clip(wristServo.getPosition() - 0.01, 0, 1));
+                }
+
+                if (gamepad2.dpad_up == true) {
+                    wristServo.setPosition(Range.clip(wristServo.getPosition() + 0.01, 0, 1));
+                }
+
+
+                if (gamepad2.x == true) {
+                    reachUptoLander();
+                }
+
+                if (gamepad2.b == true) {
+                    reachIntoCrater();
+                    armMotor.setTargetPosition(300);
+                    armMotor.setPower(armSpeed);
+                }
+
+
+                if (gamepad2.y == true) {
+                    moveArmHigherThanCrater();
+                }
+
+                if (gamepad2.a == true) {
+                    moveArmDown();
+                }
+
+               /* if (gamepad2.b == true) {
+                    turnRight(rightTurnAngle);
+                    //encoderDrive(turnSpeed, 12, -12, 3);
+                } else if (gamepad2.a == true) {
+                    driveForward(testDriveDistance, 5.0);
+                } else if (gamepad2.x == true) {
+                    turnLeft(leftTurnAngle);
+                    // encoderDrive(turnSpeed, -6, 6, 3);
+                }
+
+                if ((gamepad2.y == true) && (y == false)) {
+                    configMode = !configMode;
+                }
+
+                y = gamepad2.y;
+
+*/
+
+                if (gamepad2.right_bumper == true) {
+                    wristServo.setPosition(0.5);
+                }
+
+                if (gamepad2.left_bumper == true) {
+                    wristServo.setPosition(1);
+                }
+
+                if (gamepad2.dpad_right == true) {
+                    elbowServo.setPosition(Range.clip(elbowServo.getPosition() - 0.01, 0, 1));
+                }
+
+                if (gamepad2.dpad_left == true) {
+                    elbowServo.setPosition(Range.clip(elbowServo.getPosition() + 0.01, 0, 1));
+                }
+
+                if (gamepad1.right_trigger > 0) {
+                    progressiveAcceleration = false;
+
+                }
+
+                if (gamepad1.left_trigger > 0) {
+                    progressiveAcceleration = true;
+                }
+
+
+                if (gamepad1.start == true) {
+                    //unDock();
+                } else if (gamepad1.x == true) {
+                    encoderDrive(TURN_SPEED_PRECISE, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
+
+                } else if (gamepad1.b == true) {
+                    reachUptoLanderArmUp();
+                    //encoderDrive(TURN_SPEED_PRECISE, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
+                } else if (gamepad1.y == true) {
+                    encoderDrive(DRIVE_SPEED_PRECISE, -4, -4, 2.0);  // Forward 4 Inches with 2 Sec timeout
+                } else if (gamepad1.a == true) {
+                    encoderDrive(DRIVE_SPEED_PRECISE, 4, 4, 2.0);  // Backward 4 Inches with 2 Sec timeout
+                } else if (gamepad1.left_bumper == true) {
+                    encoderDrive(turnSpeed, 2, -2, 1.0);  // left turn 2 Inches with 1 Sec timeout
+                } else if (gamepad1.right_bumper == true) {
+                    encoderDrive(turnSpeed, -2, 2, 1.0);  // right turn 2 Inches with 1 Sec timeout
+                } else if (gamepad1.dpad_down == true) {
+                    lowerTheHook();
+                } else if (gamepad1.dpad_up == true) {
+                    liftTheHook();
+                } else if (gamepad1.dpad_right == true) {
+                    hook();
+                } else if (gamepad1.dpad_left == true) {
+                    unHook();
+                } else if ((docking == false) && (undocking == false)) {
+                    driveUsingPOVMode();
+
+                    if ((gamepad2.right_stick_y != 0) || (gamepad2.right_stick_x != 0)) {
+                        setArmToManualControl();
+                    }
+
+                    if (controlArmManually == true) {
+                        if ((armMotor.getCurrentPosition() > 1700) && (gamepad2.right_stick_y < 0)) {
+
+                        } else {
+                            armMotor.setPower(-gamepad2.right_stick_y * armSpeed);
+                        }
+
+                        armSlideMotor.setPower(gamepad2.right_stick_x * armSlideSpeed);
+                    }
+
+                }
+
             }
+
 
         }
-    }
 
-    //----------------------------------------------------------------------------------------------
-    // Telemetry Configuration
-    //----------------------------------------------------------------------------------------------
-
-    void composeTelemetry() {
-
-        // At the beginning of each telemetry update, grab a bunch of data
-        // from the IMU that we will then display in separate lines.
-        telemetry.addAction(new Runnable() {
-            @Override
-            public void run() {
-                // Acquiring the angles is relatively expensive; we don't want
-                // to do that in each of the three items that need that info, as that's
-                // three times the necessary expense.
-                angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                gravity = imu.getGravity();
-            }
-        });
-
-        telemetry.addLine()
-                .addData("status", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return imu.getSystemStatus().toShortString();
-                    }
-                })
-                .addData("calib", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return imu.getCalibrationStatus().toString();
-                    }
-                });
-
-        telemetry.addLine()
-                .addData("heading", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return formatAngle(angles.angleUnit, angles.firstAngle);
-                    }
-                })
-                .addData("roll", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return formatAngle(angles.angleUnit, angles.secondAngle);
-                    }
-                })
-                .addData("pitch", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return formatAngle(angles.angleUnit, angles.thirdAngle);
-                    }
-                });
-
-        telemetry.addLine()
-                .addData("grvty", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return gravity.toString();
-                    }
-                })
-                .addData("mag", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return String.format(Locale.getDefault(), "%.3f",
-                                Math.sqrt(gravity.xAccel * gravity.xAccel
-                                        + gravity.yAccel * gravity.yAccel
-                                        + gravity.zAccel * gravity.zAccel));
-                    }
-                });
-    }
-
-    //----------------------------------------------------------------------------------------------
-    // Formatting
-    //----------------------------------------------------------------------------------------------
-
-    String formatAngle(AngleUnit angleUnit, double angle) {
-        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
-    }
-
-    String formatDegrees(double degrees) {
-        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
 
@@ -938,6 +680,13 @@ public class JTHOpModeIMU extends LinearOpMode {
 
     }
 
+    public void driveForward(double inches, double timeoutS) {
+        encoderDrive(driveSpeed, inches, inches, timeoutS);
+    }
+
+    public void driveReverse(double inches, double timeoutS) {
+        encoderDrive(driveSpeed, -inches, -inches, timeoutS);
+    }
 
     public void turnRight(int angle) {
         encoderDrive(turnSpeed, -1 * angle * 12 / 90, 1 * angle * 12 / 90, 3);
@@ -1090,6 +839,19 @@ public class JTHOpModeIMU extends LinearOpMode {
 
     }
 
+    public void dock() {
+        if ((docking == false) && (undocking == false)) {
+            docking = true;
+            liftTheHook();
+            sleep(200);
+            idle();
+            hook();
+            sleep(2000);
+            idle();
+            liftTheRobot();
+            isDocked = true;
+        }
+    }
 
     public boolean lowerTheRobot() {
         return liftTheHook();
@@ -1136,15 +898,54 @@ public class JTHOpModeIMU extends LinearOpMode {
         return true;
     }
 
+    public void dropMarker() {
+        markerServo.setPosition(0);
+        sleep(500);
+        markerServo.setPosition(1);
+    }
+
+    public void driveUsingTankMode() {
+        leftMotor.setPower(gamepad1.left_stick_y * driveSpeed);
+        rightMotor.setPower(gamepad1.right_stick_y * driveSpeed);
+    }
+
+    public void driveUsingPOVModePreciseGamePad2() {
+
+        if (gamepad2.left_stick_x != 0) {
+            leftMotor.setPower(-gamepad2.left_stick_x * TURN_SPEED_PRECISE);
+            rightMotor.setPower(gamepad2.left_stick_x * TURN_SPEED_PRECISE);
+        } else {
+
+            drivePOV = gamepad2.left_stick_y * DRIVE_SPEED_PRECISE;
+            turnPOV = -gamepad2.left_stick_x * TURN_SPEED_PRECISE;
+
+            // Combine drive and turn for blended motion.
+            leftPOV = drivePOV - turnPOV;
+            rightPOV = drivePOV + turnPOV;
+
+            // Normalize the values so neither exceed +/- 1.0
+            maxPOV = Math.max(Math.abs(leftPOV), Math.abs(rightPOV));
+            if (maxPOV > 1.0) {
+                leftPOV /= maxPOV;
+                rightPOV /= maxPOV;
+            }
+
+            // Output the safe vales to the motor drives.
+            leftMotor.setPower(-leftPOV);
+            rightMotor.setPower(-rightPOV);
+        }
+    }
+
+
     public void driveUsingPOVMode() {
 
-        float x = -gamepad1.right_stick_x;
-        float y = gamepad1.left_stick_y;
+        float x = gamepad1.right_stick_x;
+        float y = -gamepad1.left_stick_y;
         boolean preciseDrive = false;
 
         if ((gamepad2.left_stick_x != 0) || (gamepad2.left_stick_y != 0)) {
-            x = -gamepad2.left_stick_x;
-            y = gamepad2.left_stick_y;
+            x = gamepad2.left_stick_x;
+            y = -gamepad2.left_stick_y;
             preciseDrive = true;
         }
 
@@ -1170,9 +971,15 @@ public class JTHOpModeIMU extends LinearOpMode {
         // Run wheels in POV mode (note: The joystick goes negative when pushed forwards, so negate it)
         // In this mode the Left stick moves the robot fwd and back, the Right stick turns left and right.
         // This way it's also easy to just drive straight, or just turn.
-        driveStarted = 100;
+
+        if (progressiveAcceleration == true) {
+            //driveStarted = 0;
+        } else {
+            driveStarted = 100;
+        }
+
         if ((driveStarted < 100) && (preciseDrive == false)) {
-            drivePOV = -y * 0.1 * driveStarted * driveSpeed;
+            drivePOV = -y * 0.01 * driveStarted * driveSpeed;
             turnPOV = -x * turnSpeed;
         } else if (preciseDrive == true) {
             drivePOV = -y * DRIVE_SPEED_PRECISE;
@@ -1199,12 +1006,66 @@ public class JTHOpModeIMU extends LinearOpMode {
         rightMotor.setPower(-rightPOV);
     }
 
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS) {
+        int newLeftTarget;
+        int newRightTarget;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = leftMotor.getCurrentPosition() + (int) (leftInches * COUNTS_PER_INCH);
+            newRightTarget = rightMotor.getCurrentPosition() + (int) (rightInches * COUNTS_PER_INCH);
+            leftMotor.setTargetPosition(newLeftTarget);
+            rightMotor.setTargetPosition(newRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            leftMotor.setPower(Math.abs(speed));
+            rightMotor.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (leftMotor.isBusy() && rightMotor.isBusy())) {
+
+               /* // Display it for the driver.
+                telemetry.addData("Path1", "Running to %7d :%7d", newLeftTarget, newRightTarget);
+                telemetry.addData("Path2", "Running at %7d :%7d",
+                        leftMotor.getCurrentPosition(),
+                        rightMotor.getCurrentPosition());
+                telemetry.update();*/
+            }
+
+            // Stop all motion;
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+
 
     public void showMessageOnDriverStation(String msg) {
 
         telemetry.addLine(msg);
         telemetry.update();
-        //sleep(200);
+        sleep(200);
 
     }
 
@@ -1232,139 +1093,20 @@ public class JTHOpModeIMU extends LinearOpMode {
         detector.enable(); // Start the detector!
     }
 
-
-    public void disableMineralDetector() {
-        detector.disable(); // Start the detector!
+    public void trackGoldMineral() {
+        if (detector.getAligned()) {
+            encoderDrive(TURN_SPEED, 2, 2, 4.0);  // S5: Forward 40 Inches with 4 Sec timeout
+        } else if (detector.getXPosition() < 300) {
+            encoderDrive(TURN_SPEED, 1, -1, 4.0);  // S2: Turn left 2 Inches with 4 Sec timeout
+        } else {
+            encoderDrive(TURN_SPEED, -1, 1, 4.0);  // S2: Turn Right 2 Inches with 4 Sec timeout
+        }
     }
 
-    /**
-     * Resets the cumulative angle tracking to zero.
-     */
-    private void resetAngle() {
-        lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-        globalAngle = 0;
-    }
-
-    /**
-     * Get current cumulative angle rotation from last reset.
-     *
-     * @return Angle in degrees. + = left, - = right.
-     */
-    private double getAngle() {
-        // We experimentally determined the Z axis is the axis we want to use for heading angle.
-        // We have to process the angle because the imu works in euler angles so the Z axis is
-        // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
-        // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
-
-        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-
-        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
-
-
-        if (deltaAngle < -180)
-            deltaAngle += 360;
-        else if (deltaAngle > 180)
-            deltaAngle -= 360;
-
-
-        globalAngle += deltaAngle;
-
-        //showMessageOnDriverStation(globalAngle + " globalAngle " + deltaAngle);
-
-        lastAngles = angles;
-
-        return globalAngle;
-    }
-
-    /**
-     * See if we are moving in a straight line and if not return a power correction value.
-     *
-     * @return Power adjustment, + is adjust left - is adjust right.
-     */
-    private double checkDirection() {
-        // The gain value determines how sensitive the correction is to direction changes.
-        // You will have to experiment with your robot to get small smooth direction changes
-        // to stay on a straight line.
-        double correction, angle, gain = .10;
-
-        angle = getAngle();
-
-        if (angle == 0)
-            correction = 0;             // no adjustment.
-        else
-            correction = -angle;        // reverse sign of angle for correction.
-
-        correction = correction * gain;
-
-        return correction;
-    }
-
-    /**
-     * Rotate left or right the number of degrees. Does not support turning more than 180 degrees.
-     *
-     * @param degrees Degrees to turn, + is left - is right
-     */
-    public void turn(double degrees, double p) {
-
-        power = p;
-
-        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        double leftPower, rightPower;
-
-        // restart imu movement tracking.
-        resetAngle();
-
-        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
-        // clockwise (right).
-
-        if (degrees < 0) {   // turn right.
-            leftPower = power;
-            rightPower = -power;
-        } else if (degrees > 0) {   // turn left.
-            leftPower = -power;
-            rightPower = power;
-        } else return;
-
-        // set power to rotate.
-        leftMotor.setPower(leftPower);
-        rightMotor.setPower(rightPower);
-
-        // rotate until turn is completed.
-        if (degrees < 0) {
-            // On right turn we have to get off zero first.
-            while (opModeIsActive() && getAngle() == 0) {
-                if (tilted) {
-                    return;
-                }
-                idle();
-            }
-
-            while (opModeIsActive() && getAngle() > degrees) {
-                if (tilted) {
-                    return;
-                }
-                idle();
-            }
-        } else    // left turn.
-            while (opModeIsActive() && getAngle() < degrees) {
-                if (tilted) {
-                    return;
-                }
-                idle();
-            }
-
-        // turn the motors off.
-        rightMotor.setPower(0);
+    public void stopDriving() {
         leftMotor.setPower(0);
-
-        // wait for rotation to stop.
-        sleep(500);
-
-        // reset angle tracking on new heading.
-        resetAngle();
+        rightMotor.setPower(0);
     }
+
+
 }

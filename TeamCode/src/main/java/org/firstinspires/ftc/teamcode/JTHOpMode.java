@@ -7,12 +7,10 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.disnodeteam.dogecv.CameraViewDisplay;
-import com.disnodeteam.dogecv.DogeCV;
-import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;
+
 
 /*
- * Sample code for JavaTheHUTT - Raj Kammela 11/19/2018
+ * Code for JavaTheHUTT
  * 1. Two drive modes. Start button toggles between the modes. Default is Tank mode. You can see if robot is in Tank mode or not in driver station telemetry log
  *    a. Tank mode : control left motor with left stick, right motor with right stick
  *    b. POV mode  : Left stick controls forward/back word movement, like accelerator in the car. Right stick controls turns, like steering wheel.
@@ -115,8 +113,7 @@ public class JTHOpMode extends LinearOpMode {
     protected int leftTurnAngle = 0;
     protected int rightTurnAngle = 0;
 
-
-    public GoldAlignDetector detector;
+    protected boolean progressiveAcceleration = false;
 
 
     protected void initRobot() {
@@ -174,19 +171,19 @@ public class JTHOpMode extends LinearOpMode {
         sleep(200);
        */
 
+
+        telemetry.addLine("Press Start....");
+        telemetry.update();
+
+        waitForStart();
+
         initArm();
         telemetry.addLine("Arm set to home");
 
         resetArmEncoders();
         telemetry.addLine("Arm encoders reset");
 
-        enableMineralDetector();
-        telemetry.addLine("Gold detector enabled");
 
-        telemetry.addLine("Press Start....");
-        telemetry.update();
-
-        waitForStart();
 
         boolean y = false;
         boolean dpad_down = false;
@@ -258,7 +255,7 @@ public class JTHOpMode extends LinearOpMode {
                 telemetry.addData("Check angle", myAngle);*/
 
                 telemetry.addData("You are in drive mode!!", "Have fun");
-                telemetry.addData("Gold position", detector.getXPosition());
+                //telemetry.addData("Gold position", detector.getXPosition());
                 telemetry.addData("armStartLimit", armStartLimit.getState());
                 telemetry.addData("armSlideStartLimit", armSlideStartLimit.getState());
 
@@ -294,6 +291,8 @@ public class JTHOpMode extends LinearOpMode {
 
                 if (gamepad2.b == true) {
                     reachIntoCrater();
+                    armMotor.setTargetPosition(300);
+                    armMotor.setPower(armSpeed);
                 }
 
 
@@ -337,6 +336,15 @@ public class JTHOpMode extends LinearOpMode {
 
                 if (gamepad2.dpad_left == true) {
                     elbowServo.setPosition(Range.clip(elbowServo.getPosition() + 0.01, 0, 1));
+                }
+
+                if (gamepad1.right_trigger > 0) {
+                    progressiveAcceleration = false;
+
+                }
+
+                if (gamepad1.left_trigger > 0) {
+                    progressiveAcceleration = true;
                 }
 
 
@@ -957,9 +965,15 @@ public class JTHOpMode extends LinearOpMode {
         // Run wheels in POV mode (note: The joystick goes negative when pushed forwards, so negate it)
         // In this mode the Left stick moves the robot fwd and back, the Right stick turns left and right.
         // This way it's also easy to just drive straight, or just turn.
-        driveStarted = 100;
+
+        if (progressiveAcceleration == true) {
+            //driveStarted = 0;
+        } else {
+            driveStarted = 100;
+        }
+
         if ((driveStarted < 100) && (preciseDrive == false)) {
-            drivePOV = -y * 0.1 * driveStarted * driveSpeed;
+            drivePOV = -y * 0.01 * driveStarted * driveSpeed;
             turnPOV = -x * turnSpeed;
         } else if (preciseDrive == true) {
             drivePOV = -y * DRIVE_SPEED_PRECISE;
@@ -969,6 +983,8 @@ public class JTHOpMode extends LinearOpMode {
             turnPOV = -x * turnSpeed;
         }
 
+
+        showMessageOnDriverStation(drivePOV + " DriveSpeed");
 
         // Combine drive and turn for blended motion.
         leftPOV = drivePOV - turnPOV;
@@ -1045,43 +1061,12 @@ public class JTHOpMode extends LinearOpMode {
 
         telemetry.addLine(msg);
         telemetry.update();
-        sleep(200);
+        //sleep(200);
 
     }
 
 
-    public void enableMineralDetector() {
 
-        // Set up detector
-        detector = new GoldAlignDetector(); // Create detector
-        detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance()); // Initialize it with the app context and camera
-        detector.useDefaults(); // Set detector to use default settings
-
-
-        // Optional tuning
-        detector.alignSize = 100; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
-        detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
-        detector.downscale = 0.4; // How much to downscale the input frames
-
-        detector.areaScoringMethod = DogeCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
-        //detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
-        detector.maxAreaScorer.weight = 0.005; //
-
-        detector.ratioScorer.weight = 5; //
-        detector.ratioScorer.perfectRatio = 1.0; // Ratio adjustment
-
-        detector.enable(); // Start the detector!
-    }
-
-    public void trackGoldMineral() {
-        if (detector.getAligned()) {
-            encoderDrive(TURN_SPEED, 2, 2, 4.0);  // S5: Forward 40 Inches with 4 Sec timeout
-        } else if (detector.getXPosition() < 300) {
-            encoderDrive(TURN_SPEED, 1, -1, 4.0);  // S2: Turn left 2 Inches with 4 Sec timeout
-        } else {
-            encoderDrive(TURN_SPEED, -1, 1, 4.0);  // S2: Turn Right 2 Inches with 4 Sec timeout
-        }
-    }
 
     public void stopDriving() {
         leftMotor.setPower(0);

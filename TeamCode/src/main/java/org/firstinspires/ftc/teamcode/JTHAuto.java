@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 /*
  * Auto : Configurable autonomous paths.
  */
 @Autonomous(name = "JTH Auto", group = "JTH")
+@Disabled
 public class JTHAuto extends JTHOpMode {
 
     private boolean phoneInLandscape = true;
@@ -40,7 +42,7 @@ public class JTHAuto extends JTHOpMode {
         resetArmEncoders();
         telemetry.addLine("Arm encoders reset");
 
-        enableMineralDetector();
+        //enableMineralDetector();
         telemetry.addLine("Gold detector enabled");
 
         telemetry.update();
@@ -150,9 +152,9 @@ public class JTHAuto extends JTHOpMode {
             telemetry.addLine("************************************************************");
             telemetry.addLine("Dock Location   : " + dockLocation);
 
-            position = getGoldPosition();
+            // position = getGoldPosition();
 
-            telemetry.addLine("Sampling ?        : " + sample + "            " + position + " (" + detector.getXPosition() + "," + detector.getYPosition() + ")");
+            //telemetry.addLine("Sampling ?        : " + sample + "            " + position + " (" + detector.getXPosition() + "," + detector.getYPosition() + ")");
             telemetry.addLine("Sleep                  : " + sleepTimer);
             telemetry.addLine("Claiming ?         : " + claim);
             telemetry.addLine("Parking ?           : " + park);
@@ -164,7 +166,7 @@ public class JTHAuto extends JTHOpMode {
 
         //sleep(2000);
 
-        telemetry.addData("Gold X position", detector.getXPosition());
+        //telemetry.addData("Gold X position", detector.getXPosition());
 
 
         telemetry.addLine("Press Start....");
@@ -175,7 +177,7 @@ public class JTHAuto extends JTHOpMode {
 
 
         if (sample == true) {
-            position = getGoldPosition();
+            // position = getGoldPosition();
           /*  for (
                     int x = 0;
                     x < 3; x++)
@@ -758,7 +760,7 @@ public class JTHAuto extends JTHOpMode {
     }
 
 
-    private String getGoldPosition() {
+   /* private String getGoldPosition() {
         if (phoneInLandscape == true) {
             if (detector.getYPosition() <= 150) {//going left
                 return "RIGHT";
@@ -778,7 +780,7 @@ public class JTHAuto extends JTHOpMode {
             }
         }
 
-    }
+    }*/
 }
 
 

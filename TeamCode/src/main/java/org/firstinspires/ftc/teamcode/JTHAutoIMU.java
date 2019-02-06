@@ -89,12 +89,9 @@ public class JTHAutoIMU extends JTHOpModeIMU {
             if ((gamepad2.dpad_down == true) && (dpad_down == false)) {
 
                 dropMarker();
-                //dropMarker();
-                // setArmToHome();
 
             } else if ((gamepad2.dpad_up == true) && (dpad_up == false)) {
 
-                //reachIntoCrater();
                 controlArmManually = false;
 
                 wristServo.setPosition(0.6);
@@ -152,7 +149,7 @@ public class JTHAutoIMU extends JTHOpModeIMU {
 
             position = getGoldPosition();
 
-            telemetry.addLine("Sampling ?        : " + sample + "            " + position + " (" + detector.getXPosition() + "," + detector.getYPosition() + ")");
+            telemetry.addLine("Sampling ?        : " + sample + "            " + position + " (" + detector.getYPosition() + ")");
             telemetry.addLine("Sleep                  : " + sleepTimer);
             telemetry.addLine("Claiming ?         : " + claim);
             telemetry.addLine("Parking ?           : " + park);
@@ -161,38 +158,22 @@ public class JTHAutoIMU extends JTHOpModeIMU {
 
         }
 
-
-        //sleep(2000);
-
-        telemetry.addData("Gold X position", detector.getXPosition());
-
-
-        telemetry.addLine("Press Start....");
-        telemetry.update();
-
-
-        waitForStart();
+        // waitForStart();
 
 
         if (sample == true) {
-            position = getGoldPosition();
-          /*  for (
+
+            for (
                     int x = 0;
                     x < 3; x++)
 
             {
-                // sleep(1000);
+                sleep(100);
 
                 numberOfSampleCheck = numberOfSampleCheck + 1;
 
-                if (detector.getXPosition() < 100) {//going left
-                    position = "LEFT";
 
-                } else if (detector.getXPosition() > 400) {//going right
-                    position = "RIGHT";
-                } else {
-                    position = "MIDDLE";
-                }
+                position = getGoldPosition();
 
 
                 if ((position != lastPosition) & (lastPosition != "")) {
@@ -202,16 +183,16 @@ public class JTHAutoIMU extends JTHOpModeIMU {
                 lastPosition = position;
 
                 showMessageOnDriverStation(numberOfSampleCheck + ". " + position + " - " + detector.getXPosition());
-            }*/
+            }
         }
 
-        showMessageOnDriverStation("Lower the robot");
+        disableMineralDetector();
 
+        //showMessageOnDriverStation("Lower the robot");
         lowerTheRobot();
 
 
-        showMessageOnDriverStation("Unhook the robot");
-
+        //showMessageOnDriverStation("Unhook the robot");
         unHook();
 
 
@@ -229,7 +210,13 @@ public class JTHAutoIMU extends JTHOpModeIMU {
 
         if (claim == true) {
             if (dockLocation == "Depo") {
-                claimFromDepo();
+                if (position == "LEFT") {
+                    claimFromDepoLeft();
+                } else if (position == "RIGHT") {
+                    claimFromDepoRight();
+                } else if (position == "MIDDLE") {
+                    claimFromDepoMiddle();
+                }
             } else {
                 claimFromCrater();
             }
@@ -251,208 +238,108 @@ public class JTHAutoIMU extends JTHOpModeIMU {
             }
         }
 
-        sleep(2000);
+        //sleep(2000);
     }
+
+    //Code for sampling
 
     public void sampleLeft() {
-        showMessageOnDriverStation("Move forward");
-        driveForward(3, 1.1);
+        driveForward(4, 11.1);
 
-        showMessageOnDriverStation("Turn left");
-        encoderDrive(TURN_SPEED, 2.5, -2.5, 1.1);
+        turn(21, 0.3);
 
-        showMessageOnDriverStation("Reach out to untuck arm");
-        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armSlideMotor.setTargetPosition(100);
-        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+        driveForward(20, 11.1);
 
+        turn(60, 0.3);
 
-        //sleep(400);
-        showMessageOnDriverStation("Move arm up");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(400);
-        armMotor.setPower(armSpeed);
-
-        //sleep(400);
-        showMessageOnDriverStation("Set wrist and elbow position");
-        wristServo.setPosition(0.7585);
-        elbowServo.setPosition(0.1);
-
-        showMessageOnDriverStation("reach out to mineral");
-        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armSlideMotor.setTargetPosition(400);
-        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
-
-
-        //sleep(400);
-        showMessageOnDriverStation("Move arm down to mineral level");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(70); //135
-        armMotor.setPower(armSpeed);
-
-        //sleep(400);
-        showMessageOnDriverStation("Move forward");
-        driveForward(4.5, 1.1);
-
-        sleep(400);
-        showMessageOnDriverStation("Take golf shot");
-        elbowServo.setPosition(0.6);
-
-        //sampling completed, go back to home position
-
-        //sleep(200);
-        showMessageOnDriverStation("Reset elbow");
-        elbowServo.setPosition(0.15);
-
-        showMessageOnDriverStation("Init arm");
-        //initArm();
-
-        wristServo.setPosition(0.5);
-        setArmToHome();
-
-
-        sleep(500);
-
-        showMessageOnDriverStation("Move back");
-        driveForward(-7, 1.1);
-
-        //sleep(200);
-        showMessageOnDriverStation("Turn back to middle");
-        encoderDrive(TURN_SPEED, -3, 3, 1.1);
-
-        //sleep(200);
-        showMessageOnDriverStation("Move forword");
-        driveForward(4, 1.1);
-
-
-    }
-
-    public void sampleRight() {
-        showMessageOnDriverStation("Move forward");
-        driveForward(4, 1.1);
-
-        showMessageOnDriverStation("Turn right");
-        encoderDrive(TURN_SPEED, -4.3, 4.3, 1.1);
-
-        showMessageOnDriverStation("Reach out to move gold mineral");
-        //reachOutToMoveGoldMineral();
-
-        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armSlideMotor.setTargetPosition(100);
-        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
-
-        sleep(400);
-
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(400);
-        armMotor.setPower(armSpeed);
-
-        sleep(400);
-
-        wristServo.setPosition(0.8585);
-        //elbowServo.setPosition(0.3766);
-
-
-        elbowServo.setPosition(0.6);
-
-        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armSlideMotor.setTargetPosition(530);
-        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
-
-        sleep(400);
-
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(50); //135
-        armMotor.setPower(armSpeed);
-
-        sleep(400);
-
-        //showMessageOnDriverStation("Move forward");
-        driveForward(1.5, 1.1);
-
-        sleep(500);
-        elbowServo.setPosition(0.15);
-
-        sleep(500);
-        //initArm();
-
-        wristServo.setPosition(0.5);
-
-        setArmToHome();
-        //Sampling complete
-
-        sleep(500);
-
-        sleep(200);
-        driveForward(-1, 1.1);
-
-        showMessageOnDriverStation("Turn back to middle");
-        //encoderDrive(TURN_SPEED, 4.5, -4.5, 1.1);
-        encoderDrive(TURN_SPEED, 5.7, -5.7, 1.1);
-
-
-        sleep(200);
-        driveForward(3, 1.1);
+        driveForward(50, 11.1);
 
     }
 
     public void sampleMiddle() {
-        showMessageOnDriverStation("Reach out to move gold mineral");
-        //reachOutToMoveGoldMineral();
 
-        showMessageOnDriverStation("Turn right");
-        encoderDrive(TURN_SPEED, -1, 1, 1.1);
+        driveForward(25, 11.1);
 
+        driveReverse(12, 11.1);
 
-        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armSlideMotor.setTargetPosition(100);
-        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+        turn(75, 0.3);
 
-        sleep(400);
+        driveForward(25, 11.1);
 
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(400);
-        armMotor.setPower(armSpeed);
+        turn(15, 0.3);
 
-        sleep(400);
+        driveForward(30, 11.1);
 
-        wristServo.setPosition(0.8585);
-        //elbowServo.setPosition(0.3766);
+    }
 
+    public void sampleRight() {
+        driveForward(4, 11.1);
 
-        elbowServo.setPosition(0.6);
+        turn(-22, 0.3);
 
-        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armSlideMotor.setTargetPosition(540);
-        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+        driveForward(18, 11.1);
 
-        sleep(400);
+        sleep(200);
 
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(50); //140
-        armMotor.setPower(armSpeed);
+        driveReverse(13, 11.1);
 
-        sleep(400);
+        turn(94, 0.3);
 
-        showMessageOnDriverStation("Move forward");
-        driveForward(2.75, 1.1);
+        driveForward(28, 11.1);
 
-        sleep(500);
-        elbowServo.setPosition(0.15);
+        turn(18, 0.3);
 
-        sleep(500);
+        driveForward(34, 11.1);
+    }
+
+    //Code for Crater location
+
+    public void claimFromCrater() {
+
+        reachIntoCraterWithoutSlide();
 
         wristServo.setPosition(0.5);
 
-        //initArm();
-        setArmToHome();
+        sleep(1000);
 
-        sleep(500);
+        showMessageOnDriverStation("Drop Marker");
+        dropMarker();
 
-        sleep(200);
-        driveForward(6, 1.1);
-
+        //sleep(2000);
     }
+
+
+    public void parkAllianceFromClaim() {
+
+        //not tested
+
+        //showMessageOnDriverStation("Tuck before turn");
+        //setArmToHomeDown();
+
+        showMessageOnDriverStation("Move forward");
+        driveForward(-25, 10);
+
+        showMessageOnDriverStation("Turn around");
+        encoderDrive(TURN_SPEED, -23, 23, 10);
+
+
+        showMessageOnDriverStation("Reach out");
+        reachIntoCrater();
+
+
+        //sleep(2000);
+
+        driveForward(8, 1.1);
+/*        showMessageOnDriverStation("Move forward");
+        driveForward(10, 1.1);
+
+        showMessageOnDriverStation("Reach out");
+        reachIntoCrater();
+
+        showMessageOnDriverStation("Move forward");
+        driveForward(10, 1.1);*/
+    }
+
 
     public void parkAllianceFromCrater() {
 
@@ -465,36 +352,96 @@ public class JTHAutoIMU extends JTHOpModeIMU {
         driveForward(7, 1.1);
     }
 
-    public void parkAllianceFromClaim() {
 
-        //not tested
+    //Code for Depo location
 
-        showMessageOnDriverStation("Tuck before turn");
-        setArmToHomeDown();
+    public void claimFromDepoLeft() {
 
-        showMessageOnDriverStation("Move forward");
-        driveForward(-25, 10);
-
-        showMessageOnDriverStation("Turn around");
-        encoderDrive(TURN_SPEED, 23, -23, 10);
-
-
-        showMessageOnDriverStation("Reach out");
+        showMessageOnDriverStation("Reach out to crater");
         reachIntoCrater();
-
 
         sleep(2000);
 
-        driveForward(5, 1.1);
-/*        showMessageOnDriverStation("Move forward");
-        driveForward(10, 1.1);
+        showMessageOnDriverStation("Drive forward");
+        driveForward(7, 1.1);
 
-        showMessageOnDriverStation("Reach out");
+
+        showMessageOnDriverStation("Drop Marker");
+        dropMarker();
+
+
+        showMessageOnDriverStation("Move backwards");
+
+        // for middle go back 3 more inches
+
+        driveForward(-17, 10);
+
+        // showMessageOnDriverStation("Tuck the arm");
+        //initArm();
+        //setArmToHome();
+
+
+    }
+
+
+    public void claimFromDepoMiddle() {
+
+        showMessageOnDriverStation("Reach out to crater");
         reachIntoCrater();
 
-        showMessageOnDriverStation("Move forward");
-        driveForward(10, 1.1);*/
+        sleep(2000);
+
+        showMessageOnDriverStation("Drive forward");
+        driveForward(7, 1.1);
+
+
+        showMessageOnDriverStation("Drop Marker");
+        dropMarker();
+
+
+        showMessageOnDriverStation("Move backwards");
+
+        // for middle go back 3 more inches
+
+        driveForward(-17, 10);
+
+        // showMessageOnDriverStation("Tuck the arm");
+        //initArm();
+        //setArmToHome();
+
+
     }
+
+
+    public void claimFromDepoRight() {
+
+        showMessageOnDriverStation("Reach out to crater");
+        reachIntoCrater();
+
+        sleep(2000);
+
+        showMessageOnDriverStation("Drive forward");
+        driveForward(7, 1.1);
+
+
+        showMessageOnDriverStation("Drop Marker");
+        dropMarker();
+
+
+        showMessageOnDriverStation("Move backwards");
+
+        // for middle go back 3 more inches
+
+        driveForward(-17, 10);
+
+        // showMessageOnDriverStation("Tuck the arm");
+        //initArm();
+        //setArmToHome();
+
+
+    }
+
+
 
     public void parkAllianceFromDepo() {
 
@@ -564,167 +511,6 @@ public class JTHAutoIMU extends JTHOpModeIMU {
         //sleep(2000);
     }
 
-    public void claimFromDepo() {
-
-        //not tested
-
-        showMessageOnDriverStation("Reach out to crater");
-        reachIntoCrater();
-
-        sleep(2000);
-
-        showMessageOnDriverStation("Drive forward");
-        driveForward(7, 1.1);
-
-
-        showMessageOnDriverStation("Drop Marker");
-        dropMarker();
-
-
-        showMessageOnDriverStation("Move backwards");
-
-        // for middle go back 3 more inches
-
-        driveForward(-17, 10);
-
-        // showMessageOnDriverStation("Tuck the arm");
-        //initArm();
-        //setArmToHome();
-
-
-    }
-
-    public void claimFromCrater() {
-
-        setArmToHomeDown();
-
-        //not tested
-        //We are risking hitting the lander when going to the claim
-        showMessageOnDriverStation("Turn left");
-        encoderDrive(TURN_SPEED, 8.5, -8.5, 1.1);
-
-        showMessageOnDriverStation("Move forward");
-        driveForward(30, 20);
-
-        showMessageOnDriverStation("Turn left");
-        encoderDrive(TURN_SPEED, 4, -4, 1.1);
-
-        showMessageOnDriverStation("Move forward");
-        driveForward(28, 10);
-
-        //sleep(2000);
-
-        showMessageOnDriverStation("Reach out to crater");
-        reachIntoCraterWithoutSlide();
-
-        wristServo.setPosition(0.5);
-
-        sleep(1000);
-
-        showMessageOnDriverStation("Drop Marker");
-        dropMarker();
-
-        //sleep(2000);
-    }
-
-    public void dropMarker_old() {
-        //not tested
-
-        wristServo.setPosition(0.75);
-
-
-        showMessageOnDriverStation("Move arm down to start whipping  action");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(220);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm up");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(450);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm down to start whipping  action");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(220);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm up");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(450);
-        armMotor.setPower(armSpeed);
-
-        showMessageOnDriverStation("Move arm down to start whipping  action");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(220);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm up");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(450);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm down to start whipping  action");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(320);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm up");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(450);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm down to start whipping  action");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(320);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm up");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(450);
-        armMotor.setPower(armSpeed);
-
-        showMessageOnDriverStation("Move arm down to start whipping  action");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(320);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm up");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(450);
-        armMotor.setPower(armSpeed);
-
-       /* showMessageOnDriverStation("Move arm down again");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(450);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm up again");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(750);
-        armMotor.setPower(armSpeed);
-
-
-       showMessageOnDriverStation("Move arm down again");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(450);
-        armMotor.setPower(armSpeed);
-
-
-        showMessageOnDriverStation("Move arm up again");
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(750);
-        armMotor.setPower(armSpeed);*/
-    }
 
     public void dropMarker() {
         //not tested
@@ -758,7 +544,9 @@ public class JTHAutoIMU extends JTHOpModeIMU {
 
     private String getGoldPosition() {
         if (phoneInLandscape == true) {
-            if (detector.getYPosition() <= 150) {//going left
+            if (detector.getYPosition() == 0) {
+                return "NOT READY";
+            } else if (detector.getYPosition() <= 150) {//going left
                 return "RIGHT";
             } else if ((detector.getYPosition() > 150) & (detector.getYPosition() < 330)) {//going right
                 return "MIDDLE";
