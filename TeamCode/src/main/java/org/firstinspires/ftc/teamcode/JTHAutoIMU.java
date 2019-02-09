@@ -30,9 +30,11 @@ public class JTHAutoIMU extends JTHOpModeIMU {
         String lastPosition = "";
         int numberOfSampleCheck = 0;
 
+        antiTiltThread.start();
 
         initRobot();
         telemetry.addLine("Mapped hardware");
+
 
         initArm();
         telemetry.addLine("Arm set to home");
@@ -197,12 +199,22 @@ public class JTHAutoIMU extends JTHOpModeIMU {
 
 
         if (sample == true) {
-            if (position == "LEFT") {
-                sampleLeft();
-            } else if (position == "RIGHT") {
-                sampleRight();
-            } else if (position == "MIDDLE") {
-                sampleMiddle();
+            if (dockLocation == "Depo") {
+                if (position == "LEFT") {
+                    sampleLeftDepo();
+                } else if (position == "RIGHT") {
+                    sampleRightDepo();
+                } else if (position == "MIDDLE") {
+                    sampleMiddleDepo();
+                }
+            } else {
+                if (position == "LEFT") {
+                    sampleLeft();
+                } else if (position == "RIGHT") {
+                    sampleRight();
+                } else if (position == "MIDDLE") {
+                    sampleMiddle();
+                }
             }
         }
 
@@ -238,65 +250,75 @@ public class JTHAutoIMU extends JTHOpModeIMU {
             }
         }
 
+        antiTiltThread.interrupt();
+
         //sleep(2000);
     }
 
+
+    //Code for Crater location
     //Code for sampling
 
     public void sampleLeft() {
-        driveForward(4, 11.1);
+        driveForward(4, 22.2);
 
-        turn(21, 0.3);
+        turn(26, 0.3);
 
-        driveForward(20, 11.1);
+        driveForward(20, 22.2);
 
-        turn(60, 0.3);
+        turn(58, 0.3);
 
-        driveForward(50, 11.1);
+        //encoderDrive(TURN_SPEED, -27, 27, 10);
+
+        driveForwardFast(50, 22.2);
 
     }
 
     public void sampleMiddle() {
 
-        driveForward(25, 11.1);
+        driveForward(22, 22.2);
 
-        driveReverse(12, 11.1);
+        driveReverse(11, 22.2);
 
-        turn(75, 0.3);
+        turn(68, 0.3);
 
-        driveForward(25, 11.1);
+        driveForwardFast(25, 22.2);
 
         turn(15, 0.3);
 
-        driveForward(30, 11.1);
+        driveForwardFast(35, 22.2);
 
     }
 
     public void sampleRight() {
-        driveForward(4, 11.1);
+        driveForward(4, 22.2);
 
         turn(-22, 0.3);
 
-        driveForward(18, 11.1);
+        driveForward(18, 22.2);
 
-        sleep(200);
 
-        driveReverse(13, 11.1);
+        driveForward(-13, 22.2);
+        //driveReverse(13, 22.2);
 
-        turn(94, 0.3);
+        turn(90, 0.4);
 
-        driveForward(28, 11.1);
+        driveForwardFast(28, 22.2);
 
-        turn(18, 0.3);
+        //turn(18, 0.4);
 
-        driveForward(34, 11.1);
+        encoderDrive(TURN_SPEED, -4, 4, 10);
+
+
+        driveForwardFast(34, 22.2);
     }
 
-    //Code for Crater location
+
 
     public void claimFromCrater() {
 
         reachIntoCraterWithoutSlide();
+
 
         wristServo.setPosition(0.5);
 
@@ -317,27 +339,29 @@ public class JTHAutoIMU extends JTHOpModeIMU {
         //setArmToHomeDown();
 
         showMessageOnDriverStation("Move forward");
-        driveForward(-25, 10);
+        driveForward(-20, 10);
+
+        setArmToHomeDown();
+
+        // sleep(500);
 
         showMessageOnDriverStation("Turn around");
-        encoderDrive(TURN_SPEED, -23, 23, 10);
+        encoderDrive(TURN_SPEED, -27, 27, 10);
 
 
-        showMessageOnDriverStation("Reach out");
-        reachIntoCrater();
+        driveForward(28, 22.2);
 
+        reachIntoCraterWithoutSlide();
 
-        //sleep(2000);
-
-        driveForward(8, 1.1);
+        sleep(2000);
 /*        showMessageOnDriverStation("Move forward");
-        driveForward(10, 1.1);
+        driveForward(10, 22.2);
 
         showMessageOnDriverStation("Reach out");
         reachIntoCrater();
 
         showMessageOnDriverStation("Move forward");
-        driveForward(10, 1.1);*/
+        driveForward(10, 22.2);*/
     }
 
 
@@ -349,65 +373,213 @@ public class JTHAutoIMU extends JTHOpModeIMU {
         reachIntoCrater();
 
         showMessageOnDriverStation("Drive forward");
-        driveForward(7, 1.1);
+        driveForward(7, 22.2);
     }
 
 
     //Code for Depo location
 
+    public void sampleLeftDepo() {
+        driveForward(4, 22.2);
+
+        turn(26, 0.3);
+
+        driveForward(30, 22.2);
+
+
+    }
+
+
     public void claimFromDepoLeft() {
 
-        showMessageOnDriverStation("Reach out to crater");
-        reachIntoCrater();
+        turn(-20, 0.3);
+
+
+        driveForward(32, 22.2);
+
+        //sleep(300);
+
+        driveForwardFast(-18, 22.2);
+
+        //turn(-4,0.3);
+
+        //driveReverse(10, 22.2);
+
+        //turn(4,0.3);
+
+        reachIntoCraterWithHalfSlide();
+
+        wristServo.setPosition(0.5);
+
+        sleep(1000);
+
+        showMessageOnDriverStation("Drop Marker");
+        dropMarker();
+
+        //sleep(500);
+
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armSlideMotor.setTargetPosition(50);
+        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+
+        sleep(1000);
+
+        setArmToHomeDown();
+
+        sleep(500);
+
+
+        //driveForwardFast(-30, 10);
+
+        showMessageOnDriverStation("Turn around");
+        encoderDrive(TURN_SPEED, 25, -25, 10);
+
+
+        // showMessageOnDriverStation("Reach out");
+
+
+        //sleep(2000);
+
+        driveForwardFast(50, 22.2);
+
+
+        reachIntoCraterWithoutSlide();
 
         sleep(2000);
+    }
 
-        showMessageOnDriverStation("Drive forward");
-        driveForward(7, 1.1);
 
+    public void sampleMiddleDepo() {
+
+        turn(1, 0.3);
+
+        driveForward(25, 22.2);
+
+        //sleep(300);
+
+        // driveReverse(7, 22.2);
+
+    }
+
+
+    public void claimFromDepoMiddleParallelToWall() {
+
+        turn(22, 0.3);
+
+        driveForward(10, 22.2);
+
+        turn(-25, 0.3);
+
+        driveForward(31, 22.2);
+
+        //sleep(300);
+
+        driveReverse(4, 22.2);
+
+        turn(-15, 0.3);
+
+        driveReverse(14, 22.2);
+
+        //turn(5,0.3);
+
+        reachIntoCraterWithHalfSlide();
+
+        wristServo.setPosition(0.5);
+
+        sleep(1000);
 
         showMessageOnDriverStation("Drop Marker");
         dropMarker();
 
 
-        showMessageOnDriverStation("Move backwards");
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armSlideMotor.setTargetPosition(50);
+        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
 
-        // for middle go back 3 more inches
+        setArmToHomeDown();
 
-        driveForward(-17, 10);
 
-        // showMessageOnDriverStation("Tuck the arm");
-        //initArm();
-        //setArmToHome();
+        sleep(500);
 
+
+        driveForward(-30, 10);
+
+        showMessageOnDriverStation("Turn around");
+        encoderDrive(TURN_SPEED, 25, -25, 10);
+
+
+        showMessageOnDriverStation("Reach out");
+        reachIntoCrater();
+
+
+        //sleep(2000);
+
+        driveForward(8, 22.2);
 
     }
 
 
     public void claimFromDepoMiddle() {
 
-        showMessageOnDriverStation("Reach out to crater");
+        turn(-5, 0.3);
+
+
+        driveForward(5, 22.2);
+
+        //showMessageOnDriverStation("Reach out to crater");
         reachIntoCrater();
 
-        sleep(2000);
+        wristServo.setPosition(0.5);
 
-        showMessageOnDriverStation("Drive forward");
-        driveForward(7, 1.1);
-
+        sleep(1000);
 
         showMessageOnDriverStation("Drop Marker");
         dropMarker();
 
+        //sleep(500);
 
-        showMessageOnDriverStation("Move backwards");
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armSlideMotor.setTargetPosition(50);
+        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
 
-        // for middle go back 3 more inches
+        sleep(1000);
 
-        driveForward(-17, 10);
+        setArmToHomeDown();
 
-        // showMessageOnDriverStation("Tuck the arm");
-        //initArm();
-        //setArmToHome();
+
+        sleep(500);
+
+        driveForward(12, 22.2);
+
+
+        turn(95, 0.3);
+        //encoderDrive(TURN_SPEED, 11, -11, 10);
+
+        driveForward(15, 22.2);
+
+        turn(10, 0.3);
+
+        //encoderDriveFast(TURN_SPEED, -5, 25, 10);
+
+
+        showMessageOnDriverStation("Drive forward");
+        driveForward(45, 22.2);
+
+
+        showMessageOnDriverStation("Reach out to crater");
+        reachIntoCraterWithoutSlide();
+
+        sleep(2000);
+        //sleep(3000);
+    }
+
+
+    public void sampleRightDepo() {
+        driveForward(4, 22.2);
+
+        turn(-21, 0.3);
+
+        driveForward(33, 22.2);
 
 
     }
@@ -415,29 +587,53 @@ public class JTHAutoIMU extends JTHOpModeIMU {
 
     public void claimFromDepoRight() {
 
-        showMessageOnDriverStation("Reach out to crater");
+        turn(45, 0.3);
+
+        driveForwardFast(20, 22.2);
+
+        sleep(500);
+
+        driveForwardFast(-13, 22.2);
+
         reachIntoCrater();
 
-        sleep(2000);
+        wristServo.setPosition(0.5);
 
-        showMessageOnDriverStation("Drive forward");
-        driveForward(7, 1.1);
-
+        sleep(1000);
 
         showMessageOnDriverStation("Drop Marker");
         dropMarker();
 
 
-        showMessageOnDriverStation("Move backwards");
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armSlideMotor.setTargetPosition(50);
+        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
 
-        // for middle go back 3 more inches
 
-        driveForward(-17, 10);
+        sleep(1000);
 
-        // showMessageOnDriverStation("Tuck the arm");
-        //initArm();
-        //setArmToHome();
+        setArmToHomeDown();
 
+
+        sleep(500);
+
+
+        turn(35, 0.3);
+
+        driveForwardFast(25, 10);
+
+        turn(20, 0.3);
+
+
+        driveForwardFast(55, 10);
+
+        //showMessageOnDriverStation("Reach out");
+        reachIntoCraterWithoutSlide();
+
+
+        sleep(2000);
+
+        // driveForwardFast(15, 22.2);
 
     }
 
@@ -445,70 +641,14 @@ public class JTHAutoIMU extends JTHOpModeIMU {
 
     public void parkAllianceFromDepo() {
 
-        setArmToHomeDown();
 
-        sleep(1000);
 
-        driveForward(6, 10);
 
-        showMessageOnDriverStation("Turn right");
-        encoderDrive(TURN_SPEED, -8, 8, 1.1);
-
-        showMessageOnDriverStation("Move forward");
-        driveForward(28, 1.1);
-
-        showMessageOnDriverStation("Turn right");
-        encoderDrive(TURN_SPEED, -8, 8, 1.1);
-
-        showMessageOnDriverStation("Move forward");
-        driveForward(4, 1.1);
-
-        showMessageOnDriverStation("Reach out to crater");
-        reachIntoCrater();
-
-        sleep(2000);
-
-        //showMessageOnDriverStation("Move forward");
-        // driveForward(2, 1.1);
     }
 
     public void parkOpponentFromDepo() {
 
-        setArmToHomeDown();
 
-        sleep(1000);
-
-        driveForward(6, 10);
-
-
-        //not tested
-        //We are risking hitting the lander when going to the claim
-        showMessageOnDriverStation("Turn left");
-        encoderDrive(TURN_SPEED, 10, -10, 1.1);
-
-        showMessageOnDriverStation("Move forward");
-        driveForward(32, 20);
-
-        showMessageOnDriverStation("Turn left");
-        encoderDrive(TURN_SPEED, 6, -6, 1.1);
-
-
-        //sleep(2000);
-
-        showMessageOnDriverStation("Reach out to crater");
-        reachIntoCrater();
-
-
-        sleep(2000);
-
-
-        showMessageOnDriverStation("Move forward");
-        driveForward(8, 10);
-
-        //showMessageOnDriverStation("Drop Marker");
-        //dropMarker();
-
-        //sleep(2000);
     }
 
 
@@ -535,7 +675,7 @@ public class JTHAutoIMU extends JTHOpModeIMU {
 
         showMessageOnDriverStation("Move arm up");
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(500);
+        armMotor.setTargetPosition(600);
         armMotor.setPower(armSpeed);
 
 

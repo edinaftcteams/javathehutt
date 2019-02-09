@@ -58,7 +58,7 @@ public class JTHOpModeIMU extends LinearOpMode {
     protected static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     protected static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    protected static final double DRIVE_SPEED = 0.8;
+    protected static final double DRIVE_SPEED = 0.9;
     protected static final double DRIVE_SPEED_REVERSE = 0.3;
 
     protected static final double TURN_SPEED = 0.5;
@@ -151,6 +151,8 @@ public class JTHOpModeIMU extends LinearOpMode {
 
     Orientation lastAngles = new Orientation();
     double globalAngle, power = .30, correction;
+
+    Thread antiTiltThread = new AntiTiltThread();
 
 
     protected void initRobot() {
@@ -248,7 +250,6 @@ public class JTHOpModeIMU extends LinearOpMode {
         telemetry.update();
 
 
-        Thread antiTiltThread = new AntiTiltThread();
 
         // Set up our telemetry dashboard
         composeTelemetry();
@@ -436,12 +437,32 @@ public class JTHOpModeIMU extends LinearOpMode {
                 progressiveDrive++;
                 progressiveDrive = Range.clip(progressiveDrive, 1, 100);
 
-                leftMotor.setPower(Math.abs(speed * 0.01 * progressiveDrive));
-                rightMotor.setPower(Math.abs(speed * 0.01 * progressiveDrive));
+                currentTilt = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle;
 
-                if (tilted) {
+                if ((currentTilt <= -7) & (leftInches < 0)) {
+                    //driveReverse(6, 5);
+                    //  stopDriving();
+                    tilted = true;
+                    leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                    leftMotor.setPower(0.5);
+                    rightMotor.setPower(0.5);
+                    sleep(100);
+                    leftMotor.setPower(0);
+                    rightMotor.setPower(0);
+
                     return;
+                } else {
+                    leftMotor.setPower(Math.abs(speed * 0.01 * progressiveDrive));
+                    rightMotor.setPower(Math.abs(speed * 0.01 * progressiveDrive));
+
                 }
+
+
+                //  if (tilted) {
+                //       return;
+                //   }
                /* // Display it for the driver.
                 telemetry.addData("Path1", "Running to %7d :%7d", newLeftTarget, newRightTarget);
                 telemetry.addData("Path2", "Running at %7d :%7d",
@@ -463,8 +484,97 @@ public class JTHOpModeIMU extends LinearOpMode {
     }
 
 
+    public void encoderDriveFast(double speed,
+                                 double leftInches, double rightInches,
+                                 double timeoutS) {
+        int newLeftTarget;
+        int newRightTarget;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = leftMotor.getCurrentPosition() + (int) (leftInches * COUNTS_PER_INCH);
+            newRightTarget = rightMotor.getCurrentPosition() + (int) (rightInches * COUNTS_PER_INCH);
+            leftMotor.setTargetPosition(newLeftTarget);
+            rightMotor.setTargetPosition(newRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            leftMotor.setPower(Math.abs(speed * 0.01));
+            rightMotor.setPower(Math.abs(speed * 0.01));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+
+            int progressiveDrive = 1;
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (leftMotor.isBusy() && rightMotor.isBusy())) {
+
+                progressiveDrive++;
+                progressiveDrive = Range.clip(progressiveDrive, 1, 100);
+
+                currentTilt = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle;
+
+                if ((currentTilt <= -7) & (leftInches < 0)) {
+                    //driveReverse(6, 5);
+                    //  stopDriving();
+                    tilted = true;
+                    leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                    leftMotor.setPower(0.5);
+                    rightMotor.setPower(0.5);
+                    sleep(100);
+                    leftMotor.setPower(0);
+                    rightMotor.setPower(0);
+
+                    return;
+                } else {
+                    leftMotor.setPower(Math.abs(speed));
+                    rightMotor.setPower(Math.abs(speed));
+
+                }
+
+
+                //  if (tilted) {
+                //       return;
+                //   }
+               /* // Display it for the driver.
+                telemetry.addData("Path1", "Running to %7d :%7d", newLeftTarget, newRightTarget);
+                telemetry.addData("Path2", "Running at %7d :%7d",
+                        leftMotor.getCurrentPosition(),
+                        rightMotor.getCurrentPosition());
+                telemetry.update();*/
+            }
+
+            // Stop all motion;
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+
     public void driveForward(double inches, double timeoutS) {
         encoderDrive(DRIVE_SPEED, -inches, -inches, timeoutS);
+    }
+
+    public void driveForwardFast(double inches, double timeoutS) {
+        encoderDriveFast(DRIVE_SPEED, -inches, -inches, timeoutS);
     }
 
     public void driveReverse(double inches, double timeoutS) {
@@ -554,8 +664,6 @@ public class JTHOpModeIMU extends LinearOpMode {
         public void run() {
             double lastTilt = 0;
             while (!isInterrupted()) {
-                // we record the Y values in the main class to make showing them in telemetry
-                // easier.
                 currentTilt = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle;
 
                 if ((lastTilt <= -7) & (currentTilt > -7)) {
@@ -564,8 +672,6 @@ public class JTHOpModeIMU extends LinearOpMode {
                     rightMotor.setPower(0);
                 }
                 if (currentTilt <= -7) {
-                    //driveReverse(6, 5);
-                    //  stopDriving();
                     tilted = true;
                     leftMotor.setPower(0.5);
                     rightMotor.setPower(0.5);
@@ -691,6 +797,23 @@ public class JTHOpModeIMU extends LinearOpMode {
     }
 
 
+    public void reachIntoCraterWithHalfSlide() {
+        controlArmManually = false;
+
+        //wristServo.setPosition(1);
+        elbowServo.setPosition(0.437);
+
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setTargetPosition(550);
+        armMotor.setPower(armSpeed);
+
+
+        armSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armSlideMotor.setTargetPosition(200);
+        armSlideMotor.setPower(ARM_SLIDE_HOME_SPEED);
+    }
+
     public void reachIntoCraterWithoutSlide() {
         controlArmManually = false;
 
@@ -699,7 +822,7 @@ public class JTHOpModeIMU extends LinearOpMode {
 
 
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setTargetPosition(400);
+        armMotor.setTargetPosition(550);
         armMotor.setPower(armSpeed);
 
 
@@ -1338,21 +1461,21 @@ public class JTHOpModeIMU extends LinearOpMode {
             // On right turn we have to get off zero first.
             while (opModeIsActive() && getAngle() == 0) {
                 if (tilted) {
-                    return;
+                    //return;
                 }
                 idle();
             }
 
             while (opModeIsActive() && getAngle() > degrees) {
                 if (tilted) {
-                    return;
+                    //  return;
                 }
                 idle();
             }
         } else    // left turn.
             while (opModeIsActive() && getAngle() < degrees) {
                 if (tilted) {
-                    return;
+                    // return;
                 }
                 idle();
             }
